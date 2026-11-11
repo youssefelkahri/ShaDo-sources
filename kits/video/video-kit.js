@@ -53,7 +53,7 @@
   const BUILTIN_HOSTERS = [
     ['streamtape', ['streamtape']], ['dood', ['dood', 'd0o0d']], ['mixdrop', ['mixdrop']], ['okru', ['ok.ru', 'okru']],
     ['streamwish', ['streamwish', 'hgcloud', 'hgplaycdn', 'hglamioz', 'niramirus', 'playnixes', 'medixiru', 'hanerix', 'audinifer', 'vibuxer', 'masukestin']],
-    ['filemoon', ['filemoon']], ['filelions', ['filelions']], ['lulustream', ['lulustream', 'luluvdo', 'luluvid']], ['mp4upload', ['mp4upload']],
+    ['pixeldrain', ['pixeldrain']], ['filemoon', ['filemoon']], ['filelions', ['filelions']], ['lulustream', ['lulustream', 'luluvdo', 'luluvid']], ['mp4upload', ['mp4upload']],
     ['uqload', ['uqload']], ['voe', ['voe.sx', 'voe-', 'tubeless', 'simpulumlamerop', 'urochsunloath', 'metagnathtuggers']], ['upstream', ['upstream']], ['earnvids', ['earnvids']], ['vidtube', ['vidtube', 'vidoba', 'mp4plus', 'anafast', 'aflam', 'reviewrate', 'vidspeed', '1vid']],
   ];
 
@@ -116,6 +116,10 @@
       const m = t.match(/"videos":(\[[^\]]*\])/); if (!m) return null; let v = []; try { v = JSON.parse(m[1]); } catch (e) { return null; }
       const rank = ['ultra', 'quad', 'full', 'hd', 'sd', 'low', 'lowest', 'mobile']; v.sort((a, b) => rank.indexOf(a.name) - rank.indexOf(b.name));
       return v[0] && v[0].url ? { url: abs(v[0].url, url), headers: { Referer: 'https://ok.ru/' }, type: 'mp4' } : null;
+    };
+    special.pixeldrain = async function (url) { // من مكتبة skystream: /u/ID → /api/file/ID
+      const m = url.match(/^(https?:\/\/[^\/]+)\/u\/([A-Za-z0-9_-]+)/); if (!m) return null;
+      return { url: m[1] + '/api/file/' + m[2] + '?download', headers: { Referer: url }, type: 'mp4' };
     };
     special.mp4upload = async function (url) {
       const id = (url.match(/mp4upload\.com\/(?:embed-)?([a-z0-9]+)/i) || [])[1]; if (!id) return null;
