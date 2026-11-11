@@ -1,0 +1,272 @@
+'use strict';
+/* kits/video/video-kit.js — نواة مصادر الفيديو المشتركة (مستقلة عن المنصّة).
+ * ShadoVideo.create({ net, capture?, knowledge?, log? }) -> kit
+ *   net.get(url, { headers, method, body })  -> { status, body, url, headers }   (يحقنها التطبيق: fetch أو الوسيط الأصلي)
+ *   capture(url, { timeout })                -> [روابط m3u8/mp4]               (WebView مخفي؛ اختياري)
+ *   knowledge = { hosters, patterns }        (محتوى knowledge/video/*.json؛ اختياري، لدينا نسخة مدمجة)
+ * الطبقات: API ← قالب معروف (iframes/DooPlay) مع مستخرج الخادم ← التقاط الشبكة. والتحقق من الرابط قبل اعتماده. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(); else root.ShadoVideo = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const BAD = /\.(jpg|jpeg|png|gif|webp|vtt|srt|css|js|svg|ico)(\?|$)|thumb|poster|preview|sprite/i;
+  const abs = (u, base) => { try { if (u.startsWith('//')) u = 'https:' + u; return new URL(u.replace(/\\\//g, '/'), base).href; } catch (e) { return ''; } };
+  const origin = u => { try { return new URL(u).origin; } catch (e) { return ''; } };
+  const baseName = h => String(h).toLowerCase().replace(/^www\./, '').split('.').slice(-2, -1)[0] || '';
+  const b64 = s => { try { return typeof atob === 'function' ? atob(s) : Buffer.from(s, 'base64').toString('binary'); } catch (e) { return ''; } };
+
+  // ---------- فك p.a.c.k.e.r ----------
+  function unpackOne(src) {
+    const m = src.match(/}\s*\(\s*'([\s\S]*?)'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*'([\s\S]*?)'\.split\('\|'\)/);
+    if (!m) return '';
+    let p = m[1]; const a = +m[2]; let c = +m[3]; const k = m[4].split('|');
+    const enc = n => (n < a ? '' : enc(Math.floor(n / a))) + ((n = n % a) > 35 ? String.fromCharCode(n + 29) : n.toString(36));
+    const dict = {};
+    while (c--) dict[enc(c)] = k[c] || enc(c);
+    return p.replace(/\\'/g, "'").replace(/\b\w+\b/g, w => (w in dict ? dict[w] : w));
+  }
+  function unpackAll(html) {
+    let out = ''; const rx = /eval\(function\(p,a,c,k,e,[dr]\)[\s\S]*?\.split\('\|'\)[^)]*\)\)/g; let m;
+    while ((m = rx.exec(html))) { try { out += '\n' + unpackOne(m[0]); } catch (e) { } }
+    return out;
+  }
+
+  // ---------- العثور على روابط الوسائط في نص ----------
+  function findMedia(text, base) {
+    const found = [];
+    const rxs = [
+      /(?:file|src|source|video_url|hls|url)\s*["']?\s*[:=]\s*["']([^"']+\.(?:m3u8|mp4)[^"']*)["']/gi,
+      /sources\s*:\s*\[\s*["']([^"']+)["']/gi,
+      /<source[^>]+src=["']([^"']+)["']/gi,
+      /["'](https?:\\?\/\\?\/[^"'\s]+\.(?:m3u8|mp4)(?:\?[^"'\s]*)?)["']/gi,
+    ];
+    for (const rx of rxs) { let m; while ((m = rx.exec(text))) { const u = abs(m[1], base); if (u && /^https?:/.test(u) && !BAD.test(u)) found.push(u); } }
+    const uniq = [...new Set(found)];
+    uniq.sort((x, y) => (/\.m3u8/.test(y) ? 1 : 0) - (/\.m3u8/.test(x) ? 1 : 0));
+    return uniq;
+  }
+  const iframeOf = (html, base) => { const m = html.match(/<iframe[^>]+src=["']([^"']+)["']/i); return m ? abs(m[1], base) : ''; };
+
+  // ---------- المعرفة المدمجة (تُستبدل بـ knowledge/video/hosters.json إن مُرِّر) ----------
+  const BUILTIN_HOSTERS = [
+    ['streamtape', ['streamtape']], ['dood', ['dood', 'd0o0d']], ['mixdrop', ['mixdrop']], ['okru', ['ok.ru', 'okru']],
+    ['streamwish', ['streamwish', 'hgcloud', 'hgplaycdn', 'hglamioz', 'niramirus', 'playnixes', 'medixiru', 'hanerix', 'audinifer', 'vibuxer', 'masukestin']],
+    ['filemoon', ['filemoon']], ['filelions', ['filelions']], ['lulustream', ['lulustream', 'luluvdo', 'luluvid']], ['mp4upload', ['mp4upload']],
+    ['uqload', ['uqload']], ['upstream', ['upstream']], ['earnvids', ['earnvids']], ['vidtube', ['vidtube', 'vidoba', 'mp4plus', 'anafast', 'aflam', 'reviewrate', 'vidspeed', '1vid']],
+  ];
+
+  function create(opts) {
+    opts = opts || {};
+    const net = opts.net, capture = opts.capture || null, logf = opts.log || (() => { });
+    const K = opts.knowledge || {};
+    const hosters = (K.hosters && K.hosters.hosters)
+      ? K.hosters.hosters.map(h => [h.id, h.domains.map(d => baseName(d) || d)])
+      : BUILTIN_HOSTERS;
+    const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36';
+    const get = async (url, o) => { o = o || {}; o.headers = Object.assign({ 'User-Agent': UA }, o.headers || {}); return net.get(url, o); };
+    const okr = r => r && r.status < 400 && r.body;
+    const cf = b => /just a moment|cf-chl|challenge-platform/i.test(String(b || '').slice(0, 4000));
+
+    function hosterOf(url) {
+      let h = ''; try { h = new URL(url).hostname.toLowerCase(); } catch (e) { return ''; }
+      for (const [id, keys] of hosters) if (keys.some(k => h.includes(k))) return id;
+      return '';
+    }
+
+    // ---------- مستخرجات خاصة ----------
+    const special = {
+      async streamtape(url) {
+        const r = await get(url); if (!okr(r)) return null;
+        const line = r.body.split('\n').find(l => l.includes("botlink').innerHTML")) || r.body.split('\n').find(l => l.includes('robotlink'));
+        if (!line) return null;
+        const expr = (line.split(').innerHTML')[1] || line.split('innerHTML')[1] || '').replace(/^\s*=\s*/, '').replace(/;\s*$/, '');
+        let out = '';
+        for (const part of expr.split('+')) {
+          const m = part.match(/['"]([^'"]*)['"]\)?((?:\.substring\(\d+\))*)/); if (!m) continue;
+          let s = m[1]; for (const k of m[2].matchAll(/\.substring\((\d+)\)/g)) s = s.substring(+k[1]); out += s;
+        }
+        return out ? { url: 'https:' + out.replace(/^https?:/, '') + '&stream=1', headers: { Referer: url }, type: 'mp4' } : null;
+      },
+      async dood(url) {
+        const e = url.replace('/d/', '/e/'); const r = await get(e); if (!okr(r)) return null;
+        const host = origin(r.url || e); const md5 = (r.body.match(/\/pass_md5\/[^'"]*/) || [])[0]; if (!md5) return null;
+        const p = await get(host + md5, { headers: { Referer: r.url || e } }); if (!okr(p)) return null;
+        const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const rand = Array.from({ length: 10 }, () => abc[Math.floor(Math.random() * abc.length)]).join('');
+        return { url: p.body.trim() + rand + '?token=' + md5.split('/').pop() + '&expiry=' + Date.now(), headers: { Referer: host + '/' }, type: 'mp4' };
+      },
+      async mixdrop(url) {
+        const r = await get(url.replace('/f/', '/e/')); if (!okr(r)) return null;
+        const link = ((unpackAll(r.body).match(/wurl.*?=.*?"(.*?)";/)) || [])[1];
+        return link ? { url: abs(link, url), headers: { Referer: url }, type: 'mp4' } : null;
+      },
+    };
+
+    // ---------- استخراج رابط من صفحة تضمين ----------
+    async function extractEmbed(embed, referer, depth) {
+      depth = depth || 0;
+      const id = hosterOf(embed);
+      if (depth === 0 && special[id]) { try { const s = await special[id](embed); if (s && s.url) return Object.assign({ via: id }, s); } catch (e) { } }
+      const r = await get(embed, { headers: referer ? { Referer: referer } : {} });
+      if (!r || r.status >= 400) throw new Error('HTTP ' + (r && r.status || '?'));
+      const html = r.body || '';
+      if (cf(html)) { const e = new Error('cloudflare'); e.cf = true; throw e; }
+      const urls = findMedia(html + unpackAll(html), embed);
+      if (urls.length) { const o = origin(embed); return { url: urls[0], all: urls, headers: { Referer: o + '/', Origin: o }, type: /\.m3u8/.test(urls[0]) ? 'hls' : 'mp4', via: id || 'generic' }; }
+      const inner = depth < 2 && iframeOf(html, embed);
+      if (inner && inner !== embed) return extractEmbed(inner, embed, depth + 1);
+      return null;
+    }
+
+    // ---------- خوادم الحلقة من صفحتها ----------
+    function serversFromPage(html, pageUrl) {
+      const out = [], seen = new Set();
+      const add = (url, name, via) => { url = abs(url, pageUrl); if (!url || !/^https?:/.test(url) || seen.has(url) || url === pageUrl) return; seen.add(url); out.push({ url, name: name || hosterOf(url) || baseName(new URL(url).hostname), via }); };
+      let m;
+      const rxI = /<iframe[^>]+(?:data-src|data-lazy-src|src)=["']([^"']+)["']/gi; while ((m = rxI.exec(html))) add(m[1], '', 'iframe');
+      const rxT = /player_iframe\.location\.href\s*=\s*['"]([^'"]+)['"]/g; while ((m = rxT.exec(html))) add(m[1], '', 'tabs');
+      const rxA = /data-(?:embed|url|src|link|server|iframe|video|href)=["']([^"']+)["']/gi;
+      while ((m = rxA.exec(html))) { let v = m[1]; if (!/^(https?:)?\/\//.test(v) && /^[A-Za-z0-9+\/=]{16,}$/.test(v)) { const d = b64(v); if (/^(https?:)?\/\//.test(d)) v = d; else if (/<iframe/i.test(d)) { const i = iframeOf(d, pageUrl); if (i) v = i; } } if (/^(https?:)?\/\//.test(v)) add(v, '', 'data-attr'); }
+      const rxO = /<option[^>]+value=["']([^"']+)["'][^>]*>([^<]*)/gi; while ((m = rxO.exec(html))) { let v = m[1]; if (/^[A-Za-z0-9+\/=]{16,}$/.test(v)) { const d = b64(v); const i = /<iframe/i.test(d) ? iframeOf(d, pageUrl) : (/^https?:/.test(d) ? d : ''); if (i) v = i; } if (/^(https?:)?\/\//.test(v)) add(v, m[2].trim(), 'option'); }
+      return out;
+    }
+    // DooPlay: li[data-nume] + admin-ajax
+    function dooplayItems(html) {
+      const out = []; const rx = /<li[^>]+(?:id=["']player-option-\d+["'])?[^>]*data-post=["'](\d+)["'][^>]*data-nume=["'](\w+)["'][^>]*data-type=["'](\w+)["'][^>]*>([\s\S]*?)<\/li>/gi; let m;
+      while ((m = rx.exec(html))) out.push({ post: m[1], nume: m[2], type: m[3], name: m[4].replace(/<[^>]+>/g, '').trim() });
+      if (!out.length) { const rx2 = /data-post=["'](\d+)["'][^>]*data-nume=["'](\w+)["']/gi; while ((m = rx2.exec(html))) out.push({ post: m[1], nume: m[2], type: 'tv', name: '' }); }
+      return out;
+    }
+    async function dooplayServers(pageUrl, html) {
+      const items = dooplayItems(html), o = origin(pageUrl), out = [];
+      await Promise.all(items.map(async it => {
+        try {
+          const r = await get(o + '/wp-admin/admin-ajax.php', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest', Referer: pageUrl }, body: 'action=doo_player_ajax&post=' + it.post + '&nume=' + it.nume + '&type=' + it.type });
+          if (!okr(r)) return; let u = '';
+          try { const j = JSON.parse(r.body); u = j.embed_url || ''; } catch (e) { }
+          if (/<iframe/i.test(u)) u = iframeOf(u, pageUrl);
+          if (u) { u = abs(u, pageUrl); if (u && !out.some(x => x.url === u)) out.push({ url: u, name: it.name || hosterOf(u), via: 'dooplay' }); }
+        } catch (e) { }
+      }));
+      return out;
+    }
+
+    // ---------- التحقق من الرابط ----------
+    async function verify(link) {
+      const t = Date.now();
+      try {
+        const r = await get(link.url, { headers: Object.assign({ Range: 'bytes=0-2047' }, link.headers || {}) });
+        const ct = String((r.headers && (r.headers['content-type'] || r.headers['Content-Type'])) || '');
+        let ok = false;
+        if (r && (r.status === 200 || r.status === 206)) {
+          if (/\.m3u8|mpegurl/i.test(link.url + ct) || link.type === 'hls') ok = /^\s*#EXTM3U/.test(r.body || '');
+          else ok = /video|octet-stream|mp4|mpegurl/i.test(ct) || /ftyp/.test(String(r.body || '').slice(0, 16));
+        }
+        return { ok, ms: Date.now() - t, status: r && r.status };
+      } catch (e) { return { ok: false, ms: Date.now() - t, err: String(e && e.message || e) }; }
+    }
+
+    // ---------- تشغيل خوادم الحلقة وتجميع الروابط الصالحة ----------
+    async function resolveServers(servers, referer, conc) {
+      const res = []; const q = servers.slice(); conc = conc || 4;
+      const worker = async () => {
+        while (q.length) {
+          const s = q.shift(); const t = Date.now(); let link = null, err = '';
+          try { link = await extractEmbed(s.url, referer); } catch (e) { err = String(e && e.message || e); }
+          let v = null; if (link) v = await verify(link);
+          res.push({ server: s.name, embed: s.url, via: s.via, link, ok: !!(v && v.ok), ms: Date.now() - t, err: link ? (v && v.ok ? '' : 'لا يشتغل') : (err || 'لم يُستخرج') });
+        }
+      };
+      await Promise.all(Array.from({ length: conc }, worker));
+      return res.sort((a, b) => (b.ok - a.ok) || (a.ms - b.ms));
+    }
+
+    // ---------- الطبقات ----------
+    // الطبقة «قالب»: iframes/DooPlay/data-attr
+    async function layerTemplate(pageUrl, html) {
+      const t = Date.now(); let servers = serversFromPage(html, pageUrl); let fam = 'iframe-list';
+      if (dooplayItems(html).length) { const d = await dooplayServers(pageUrl, html); if (d.length) { servers = servers.concat(d.filter(x => !servers.some(y => y.url === x.url))); fam = 'dooplay'; } }
+      const results = await resolveServers(servers, pageUrl);
+      return { layer: 'template', family: fam, ms: Date.now() - t, servers: servers.length, good: results.filter(r => r.ok).length, results };
+    }
+    // الطبقة «التقاط الشبكة»
+    async function layerCapture(pageUrl) {
+      if (!capture) return { layer: 'capture', skipped: true, good: 0, results: [] };
+      const t = Date.now(); let urls = [];
+      try { urls = await capture(pageUrl, { timeout: 40000 }) || []; } catch (e) { }
+      const results = [];
+      for (const u of urls.slice(0, 4)) { const link = { url: u, headers: { Referer: origin(pageUrl) + '/' }, type: /\.m3u8/.test(u) ? 'hls' : 'mp4' }; const v = await verify(link); results.push({ server: 'capture', embed: pageUrl, via: 'capture', link, ok: v.ok, ms: v.ms, err: v.ok ? '' : 'لا يشتغل' }); }
+      return { layer: 'capture', ms: Date.now() - t, servers: urls.length, good: results.filter(r => r.ok).length, results };
+    }
+    // الطبقة «API» (easyplex وأشباهه): كشف فقط عبر نمط public/api
+    async function layerApi(home) {
+      const o = origin(home); const t = Date.now();
+      for (const p of ['/public/api/genres/all', '/api/genres/all']) {
+        try { const r = await get(o + p); if (r && r.status === 200 && /^\s*[\[{]/.test(r.body || '')) return { layer: 'api', detected: true, base: o + p.replace('/genres/all', ''), ms: Date.now() - t }; } catch (e) { }
+      }
+      return { layer: 'api', detected: false, ms: Date.now() - t };
+    }
+
+    // حلّ حلقة: نجرّب القالب ثم الالتقاط إن لم نجد شيئاً صالحاً
+    async function resolveEpisode(pageUrl, o) {
+      o = o || {};
+      const r = await get(pageUrl);
+      if (!r || r.status >= 400) return { ok: false, error: 'HTTP ' + (r && r.status || '?') };
+      if (cf(r.body)) return { ok: false, cf: true, error: 'cloudflare' };
+      const tpl = await layerTemplate(pageUrl, r.body);
+      const layers = [tpl];
+      if (!tpl.good && o.capture !== false) layers.push(await layerCapture(pageUrl));
+      const links = [].concat(...layers.map(l => (l.results || []).filter(x => x.ok).map(x => Object.assign({ layer: l.layer }, x))));
+      return { ok: links.length > 0, links, layers };
+    }
+
+    // ---------- العثور على حلقة نموذجية من الرئيسية ----------
+    async function autoEpisode(home) {
+      const r = await get(home); if (!okr(r)) return null;
+      const rxA = /<a[^>]+href=["']([^"']+)["'][^>]*>/gi; const cand = []; let m;
+      while ((m = rxA.exec(r.body))) { const u = abs(m[1], home); if (!u || origin(u) !== origin(home)) continue; if (/episode|\/watch|\/ep[-\/]|حلقة|الحلقة|مشاهدة|\/video\/|\/movie|\/film|فيلم|مسلسل/i.test(decodeURIComponent(u))) cand.push(u); }
+      const uniq = [...new Set(cand)];
+      // نفضّل صفحة تحتوي iframe/data-nume
+      for (const u of uniq.slice(0, 8)) { try { const p = await get(u); if (okr(p) && (/<iframe|data-nume|player_iframe/i.test(p.body))) return { url: u, html: p.body, how: 'من الرئيسية' }; } catch (e) { } }
+      // خطوة ثانية: ادخل صفحة عمل وابحث عن رابط حلقة
+      for (const u of uniq.slice(0, 4)) { try { const p = await get(u); if (!okr(p)) continue; const l2 = []; let k; const rx = /<a[^>]+href=["']([^"']+)["']/gi; while ((k = rx.exec(p.body))) { const v = abs(k[1], u); if (v && origin(v) === origin(home) && v !== u && /episode|حلقة|الحلقة|\/watch/i.test(decodeURIComponent(v))) l2.push(v); } for (const v of [...new Set(l2)].slice(0, 3)) { const q = await get(v); if (okr(q) && /<iframe|data-nume|player_iframe/i.test(q.body)) return { url: v, html: q.body, how: 'من صفحة عمل' }; } } catch (e) { } }
+      return null;
+    }
+
+    // ---------- المولّد: يكفي رابط الموقع (والحلقة اختيارية) ----------
+    async function scan(o, on) {
+      const rows = [], push = (id, label, status, detail) => { const x = { id, label, status, detail }; rows.push(x); try { on && on(x); } catch (e) { } return x; };
+      const home = origin(o.home);
+      const api = await layerApi(home);
+      push('api', 'واجهة API', api.detected ? 'ok' : 'skip', api.detected ? api.base : 'غير مكتشفة');
+      let ep = o.episode ? { url: o.episode, how: 'من المستخدم' } : null;
+      if (ep) { const p = await get(ep.url); ep.html = okr(p) ? p.body : ''; }
+      if (!ep) ep = await autoEpisode(o.home);
+      if (!ep) { push('episode', 'حلقة نموذجية', 'fail', 'تعذّر إيجادها — ألصق رابط صفحة مشاهدة'); return { rows, cfg: null }; }
+      push('episode', 'حلقة نموذجية', 'ok', ep.how + ': ' + decodeURIComponent(ep.url).slice(0, 50));
+      if (cf(ep.html)) { push('cf', 'حماية Cloudflare', 'fail', 'يلزم فتح الموقع في المتصفح الداخلي لحلّ التحدّي'); return { rows, cfg: { home, family: 'cloudflare' } }; }
+      const res = await resolveEpisode(ep.url);
+      const tpl = res.layers && res.layers[0];
+      push('servers', 'خوادم الحلقة', tpl && tpl.servers ? 'ok' : 'fail', tpl ? tpl.servers + ' خادماً (' + tpl.family + ')' : 'لا شيء');
+      (tpl ? tpl.results : []).forEach(r => push('srv', r.server || 'خادم', r.ok ? 'ok' : 'fail', (r.via || '') + ' · ' + r.ms + 'ms' + (r.ok ? '' : ' · ' + r.err)));
+      const cap = res.layers && res.layers.find(l => l.layer === 'capture');
+      if (cap) push('capture', 'التقاط الشبكة', cap.good ? 'ok' : (cap.skipped ? 'skip' : 'fail'), cap.skipped ? 'غير متاح في هذا التطبيق' : cap.good + ' رابط صالح');
+      const good = (res.links || []).length;
+      push('result', 'النتيجة', good ? 'ok' : 'fail', good ? good + ' رابط صالح' : 'لا رابط صالح');
+      const cfg = { home, family: (tpl && tpl.family) || 'unknown', api: api.detected ? api.base : '', layer: good ? res.links[0].layer : '', sample: ep.url };
+      return { rows, cfg: good ? cfg : null, links: res.links || [] };
+    }
+
+    // ---------- تحليل الطرق: الأسرع ---------- 
+    async function compare(pageUrl) {
+      const r = await get(pageUrl); const html = okr(r) ? r.body : '';
+      const tpl = await layerTemplate(pageUrl, html);
+      const out = [{ label: 'قالب · ' + tpl.family, ms: tpl.ms, good: tpl.good, total: tpl.servers }];
+      if (capture) { const c = await layerCapture(pageUrl); out.push({ label: 'التقاط الشبكة', ms: c.ms, good: c.good, total: c.servers }); }
+      return { cur: out[0], alts: out.slice(1), all: out };
+    }
+
+    return { hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
+  }
+  return { create, unpackAll, findMedia };
+});

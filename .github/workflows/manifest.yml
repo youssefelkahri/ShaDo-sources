@@ -1,7 +1,7 @@
 name: Update manifest
 on:
   push:
-    paths: ['sources/**', 'manifest.json']
+    paths: ['sources/**', 'kits/**', 'manifest.json']
 permissions:
   contents: write
 jobs:

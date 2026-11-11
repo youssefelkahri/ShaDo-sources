@@ -204,5 +204,14 @@
         "filters": []
       }
     }
+  ],
+  "kits": [
+    {
+      "id": "video",
+      "name": "نواة الفيديو",
+      "version": 2,
+      "file": "kits/video/video-kit.js",
+      "sha256": "13e4f359855a0ebf192e123ae28e57772f697541cf83cb1948195466f077e4d6"
+    }
   ]
 }
