@@ -173,9 +173,9 @@
     {
       "id": "sunovels",
       "name": "شمس الروايات",
-      "version": 1,
+      "version": 2,
       "file": "sources/sunovels.js",
-      "sha256": "e2c3158a54af5faa6723a161ce9824f6aa40b15f4fcb07a72662a1396d907bb7",
+      "sha256": "ddc833b19fa4aa8d48845d4a939518a5f0144fd972a309368e7afb5188016b65",
       "minNative": 0,
       "data": {
         "id": "sunovels",
