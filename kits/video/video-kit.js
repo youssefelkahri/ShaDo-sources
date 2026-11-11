@@ -344,7 +344,20 @@
       return { home: '', tried: list.length };
     }
 
-    return { search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
+    // تحليل سرعة البحث: كل قالب بحث (الزمن وعدد النتائج). الاستبدال مسموح إن كانت النتائج ≥95% من الحالي وأسرع
+    async function compareSearch(cfg, q) {
+      const home = origin(cfg.home); const cur = cfg.searchTpl || ''; const rows = [];
+      for (const t of [...new Set([cur, ...SEARCH_TPL].filter(Boolean))]) {
+        const t0 = Date.now(); let n = 0, err = '';
+        try { const r = await get(home + t.replace('{q}', encodeURIComponent(q))); if (okr(r) && !cf(r.body)) n = anchors(r.body, home + '/').filter(x => x.title && x.title.length > 1 && x.title.length < 150).length; else err = 'HTTP ' + (r && r.status); } catch (e) { err = String(e && e.message || e); }
+        rows.push({ tpl: t, ms: Date.now() - t0, n, err, cur: t === cur });
+      }
+      const base = rows.find(x => x.cur) || { n: 0, ms: 1e9 };
+      rows.forEach(x => { x.ok = x.n > 0 && x.n >= 0.95 * base.n && x.n <= 1.5 * Math.max(base.n, 1) + 5; x.faster = !x.cur && x.ok && x.ms < base.ms; x.x = x.ms ? +(base.ms / x.ms).toFixed(1) : 0; });
+      return { cur: base, rows };
+    }
+
+    return { compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
   }
   return { create, unpackAll, findMedia };
 });
