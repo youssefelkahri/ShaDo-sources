@@ -227,15 +227,20 @@
 
     // ---------- العثور على حلقة نموذجية من الرئيسية ----------
     async function autoEpisode(home) {
-      const r = await get(home); if (!okr(r)) return null;
-      const rxA = /<a[^>]+href=["']([^"']+)["'][^>]*>/gi; const cand = []; let m;
-      while ((m = rxA.exec(r.body))) { const u = abs(m[1], home); if (!u || origin(u) !== origin(home)) continue; if (/episode|\/watch|\/ep[-\/]|حلقة|الحلقة|مشاهدة|\/video\/|\/movie|\/film|فيلم|مسلسل/i.test(decodeURIComponent(u))) cand.push(u); }
-      const uniq = [...new Set(cand)];
-      // نفضّل صفحة تحتوي iframe/data-nume
-      for (const u of uniq.slice(0, 8)) { try { const p = await get(u); if (okr(p) && (/<iframe|data-nume|player_iframe/i.test(p.body))) return { url: u, html: p.body, how: 'من الرئيسية' }; } catch (e) { } }
-      // خطوة ثانية: ادخل صفحة عمل وابحث عن رابط حلقة
-      for (const u of uniq.slice(0, 4)) { try { const p = await get(u); if (!okr(p)) continue; const l2 = []; let k; const rx = /<a[^>]+href=["']([^"']+)["']/gi; while ((k = rx.exec(p.body))) { const v = abs(k[1], u); if (v && origin(v) === origin(home) && v !== u && /episode|حلقة|الحلقة|\/watch/i.test(decodeURIComponent(v))) l2.push(v); } for (const v of [...new Set(l2)].slice(0, 3)) { const q = await get(v); if (okr(q) && /<iframe|data-nume|player_iframe/i.test(q.body)) return { url: v, html: q.body, how: 'من صفحة عمل' }; } } catch (e) { } }
-      return null;
+      const diag = { status: 0, len: 0, links: 0, cf: false, tried: 0 };
+      const r = await get(home); diag.status = r && r.status || 0; diag.len = String(r && r.body || '').length;
+      if (!okr(r)) return { diag };
+      if (cf(r.body)) { diag.cf = true; return { diag }; }
+      const O = origin(home);
+      const SKIP = /\/(category|tag|genre|genres|page|author|login|register|contact|about|privacy|dmca|search|feed|wp-|cdn-cgi|\?s=)|\.(jpg|png|webp|css|js|xml)(\?|$)|^#/i;
+      const linksOf = (html, base) => { const out = [], seen = new Set(); let m; const rx = /<a[^>]+href=["']([^"']+)["']/gi; while ((m = rx.exec(html))) { const u = abs(m[1].replace(/&amp;/g, '&'), base); if (!u || origin(u) !== O || u === base || seen.has(u) || SKIP.test(u)) continue; seen.add(u); out.push(u); } return out; };
+      const score = u => { let d = ''; try { d = decodeURIComponent(u); } catch (e) { d = u; } let sc = 0; if (/episode|\/ep[-\/]|حلقة|الحلقة|\/watch|مشاهدة|\/video|\/film|\/movie|فيلم|مسلسل|\/series|\/anime/i.test(d)) sc += 3; const path = d.replace(O, '').split('?')[0]; if (path.length > 12) sc += 1; if (path.split('/').filter(Boolean).length >= 2) sc += 1; return sc; };
+      const hasPlayer = h => /<iframe|data-nume|player_iframe|data-embed|<video|jwplayer|\.m3u8/i.test(h);
+      const l1 = linksOf(r.body, home); diag.links = l1.length;
+      const rank = l1.sort((x, y) => score(y) - score(x));
+      for (const u of rank.slice(0, 10)) { diag.tried++; try { const p = await get(u); if (okr(p) && !cf(p.body) && hasPlayer(p.body)) return { url: u, html: p.body, how: 'من الرئيسية', diag }; } catch (e) { } }
+      for (const u of rank.slice(0, 5)) { try { const p = await get(u); if (!okr(p) || cf(p.body)) continue; const l2 = linksOf(p.body, u).sort((x, y) => score(y) - score(x)); for (const v of l2.slice(0, 5)) { diag.tried++; const q = await get(v); if (okr(q) && !cf(q.body) && hasPlayer(q.body)) return { url: v, html: q.body, how: 'من صفحة عمل', diag }; } } catch (e) { } }
+      return { diag };
     }
 
     // ---------- المولّد: يكفي رابط الموقع (والحلقة اختيارية) ----------
@@ -246,8 +251,9 @@
       push('api', 'واجهة API', api.detected ? 'ok' : 'skip', api.detected ? api.base : 'غير مكتشفة');
       let ep = o.episode ? { url: o.episode, how: 'من المستخدم' } : null;
       if (ep) { const p = await get(ep.url); ep.html = okr(p) ? p.body : ''; }
-      if (!ep) ep = await autoEpisode(o.home);
-      if (!ep) { push('episode', 'حلقة نموذجية', 'fail', 'تعذّر إيجادها — ألصق رابط صفحة مشاهدة'); return { rows, cfg: null }; }
+      let dg = null;
+      if (!ep) { const f = await autoEpisode(o.home); dg = f && f.diag; ep = f && f.url ? f : null; }
+      if (!ep) { push('episode', 'حلقة نموذجية', 'fail', (dg ? 'الرئيسية: HTTP ' + dg.status + ' · ' + dg.len + 'B · ' + dg.links + ' رابط · جُرّب ' + dg.tried + (dg.cf ? ' · Cloudflare' : '') + ' — ' : '') + 'ألصق رابط صفحة مشاهدة'); return { rows, cfg: null }; }
       push('episode', 'حلقة نموذجية', 'ok', ep.how + ': ' + decodeURIComponent(ep.url).slice(0, 50));
       if (cf(ep.html)) { push('cf', 'حماية Cloudflare', 'fail', 'يلزم فتح الموقع في المتصفح الداخلي لحلّ التحدّي'); return { rows, cfg: { home, family: 'cloudflare' } }; }
       const res = await resolveEpisode(ep.url);
