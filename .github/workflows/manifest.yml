@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: node scripts/build-manifest.js
+      - run: node scripts/inline-recipes.js && node scripts/build-manifest.js
       - run: |
           if [ -n "$(git status --porcelain manifest.json)" ]; then
             git config user.name "github-actions"; git config user.email "actions@github.com"

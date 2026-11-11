@@ -209,9 +209,9 @@
     {
       "id": "video",
       "name": "نواة الفيديو",
-      "version": 18,
+      "version": 19,
       "file": "kits/video/video-kit.js",
-      "sha256": "37870dbf7dddd96c4b6f36d34c98b4f95594cac6e4fee87f1a6e89c6e7fd94b2"
+      "sha256": "9ad54f2097f83047129b28504717fa52fc84bb5fc08a2716bba1b9d93bc4f46c"
     }
   ]
 }

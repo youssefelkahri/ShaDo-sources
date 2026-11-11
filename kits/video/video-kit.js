@@ -57,6 +57,7 @@
     ['uqload', ['uqload']], ['voe', ['voe.sx', 'voe-', 'tubeless', 'simpulumlamerop', 'urochsunloath', 'metagnathtuggers']], ['upstream', ['upstream']], ['earnvids', ['earnvids']], ['vidtube', ['vidtube', 'vidoba', 'mp4plus', 'anafast', 'aflam', 'reviewrate', 'vidspeed', '1vid']],
   ];
 
+  const BUILTIN_RECIPES = /*RECIPES*/{"qeseh.net":{"search":"/?s={q}","serverAttrs":["data-server","data-src"]},"youtube.com":{"search":"/results?search_query={q}"},"n.elif.news":{"search":"/search.php?keywords={q}","serverAttrs":["data-embed"],"hop":"xtgo"},"3esk.onl":{"search":"/search/{q}/","episodes":["div.season-eps"]},"tv10.egydead.live":{"search":"/?s={q}","serverAttrs":["data-link"]},"ttunflix.blogspot.com":{"serverAttrs":["data-embed-url"]},"amd.brstej.com":{"search":"/search.php?keywords={q}","serverAttrs":["data-embed","data-embed-url"],"hop":"xtgo","episodes":["div.SeasonsBoxUL ul li","div.SeasonsEpisodes[data-serie='${seasonId}'] a"]},"anime-phoenix.com":{"serverAttrs":["data-server"],"episodes":["div#episodesGrid a.FJ-episode-wrap","a.FJ-episode-wrap","div.FJ-EpsGrid a, div#episodesGrid a.FJ-episode-wrap, ul.episodes-list a"]},"fitnur.com":{"serverAttrs":["data-src"]},"witanime.site":{"search":"/search?q={q}","episodes":["div[data-episode-list] a[href*='/watch/']"]},"w1.anime4up.rest":{"search":"/?s={q}","serverAttrs":["data-src","data-watch"],"episodes":["ul.all-episodes-list li a","#episodesList .themexblock","ul#episode-servers li[data-watch]"]},"tuniflix.site":{"search":"/?s={q}","serverAttrs":["data-src"]},"wecima.ac":{"serverAttrs":["data-src","data-url"],"episodes":["div.List--Seasons--Episodes a.SeasonsEpisodes",".EpisodesList.Full--Width a"]},"gat.animerco.org":{"search":"/?s={q}","serverAttrs":["data-src"],"episodes":["div.media-section:contains(آخر الحلقات المضافة) div.episode-card","ul.episodes-lists#filter li","div.media-seasons ul.episodes-lists li"]},"krmzi.org":{"search":"/search/{q}/page//","serverAttrs":["data-server","data-src"]},"ww1.asia2tv.pw":{"search":"/?s={q}","serverAttrs":["data-server","data-src"],"episodes":["div.loop-episode a"]},"akwam.ss":{"search":"/search?q={q}","serverAttrs":["data-src"],"episodes":["div#series-episodes div[class*='col-']","div#series-episodes div.col-lg-4, div#series-episodes div.col-md-6"]},"dima-toon.com":{"search":"/?s={q}","serverAttrs":["data-src"],"episodes":["div#cartoon-episodes-container div.episode-card a","div.episodes-grid div.episode-box a"]},"cimatn.com":{"search":"/search?q={q}","serverAttrs":["data-src"]},"mycima.living":{"serverAttrs":["data-watch"],"episodes":["div.SeasonsList ul li a",".Seasons--Episodes ul li a","div.EpisodesList a[href], a.episode[href]"]},"web11118x.faselhdx.life":{"serverAttrs":["data-src"]},"r.cimalight.co":{"search":"/search.php?keywords={q}","serverAttrs":["data-embed"],"hop":"xtgo","episodes":["div.SeasonsBox","div.SeasonsEpisodesMain div.tabcontent"]},"aflaam.com":{"search":"/search?q={q}"},"shahed4u.im":{"serverAttrs":["data-src"],"episodes":["div.w-100.bg-main.rounded.my-4 a.epss[href*='/season/']","div.w-100.bg-main.rounded.my-4 a.epss:not([href*='/season/'])","div.w-100.bg-main.rounded.my-4 a.epss:not([href*='/season/'])"]},"fullmatchshows.com":{"search":"/?s={q}"},"lodynet.watch":{"serverAttrs":["data-src"],"episodes":["#ListEpisodes","#ListEpisodes","#ListEpisodes .ItemEpisode, #ListEpisodes .CurrentEpisode"]},"tuktukhd.com":{"search":"/?s={q}&page=","serverAttrs":["data-src"],"episodes":[".allepcont, .allseasonss, .SeriesEpisodes, .SeriesSeasons",".allseasonss .Block--Item a, .SeriesSeasons .Block--Item a",".allepcont a, .SeriesEpisodesGrid a.SeriesEpisodeCard"]},"syrlive.com":{"search":"/?s={q}","serverAttrs":["data-src"]},"web8.topcinema.cam":{"search":"/search/?query={q}&type=all","serverAttrs":["data-server","data-src"]},"cimacub.com":{"search":"/?s={q}","serverAttrs":["data-src","data-watch"]},"new61.5tv.lol":{"search":"/search/?q={q}","serverAttrs":["data-src"],"episodes":["article.ftv-home-episode-card",".ftv-series-episodes-grid .ftv-episode-completion-item, .ftv-episodes-grid .ftv-episode-completion-item"]},"w30.shahidwbas.tv":{"serverAttrs":["data-embed"],"episodes":["div.SeasonsBoxUL button.tablinks"]}}/*END*/;
   function create(opts) {
     opts = opts || {};
     const net = opts.net, capture = opts.capture || null, logf = opts.log || (() => { });
@@ -88,6 +89,14 @@
       const m = b.match(/http-equiv=["']refresh["'][^>]*url=([^"'>\s]+)/i) || b.match(/(?<![\w.])(?:window\.|document\.)?location(?:\.href)?\s*=\s*["'](https?:\/\/[^"']+)["']/i);
       if (m && b.length < 5000) { const u = m[1]; if (orig(u) && orig(u) !== orig(url) && sameSite(u, url)) return u; }
       return '';
+    }
+    // وصفات المواقع (من كود إضافات CloudStream): بحث، قفزة، محددات الحلقات
+    const RECIPES = Object.assign({}, BUILTIN_RECIPES, (K.recipes && K.recipes.recipes) || {});
+    function recipeFor(url) {
+      const h = hostKey(url); if (!h) return null;
+      const keys = [h]; for (const [k, v] of Object.entries(moves)) if (hostKey(v) === h) keys.push(k); // نطاق انتقل
+      for (const k of keys) { if (RECIPES[k]) return RECIPES[k]; for (const [rk, rv] of Object.entries(RECIPES)) if (sameSite('https://' + rk, 'https://' + k)) return rv; }
+      return null;
     }
     const get = async (url, o) => {
       o = o || {}; o.headers = Object.assign({ 'User-Agent': UA }, o.headers || {});
@@ -294,7 +303,7 @@
       let html = r.body, page = pageUrl;
       // قفزة «a.xtgo» ونحوها (Bristege): صفحة المشاهدة → صفحة التشغيل، والمُحيل = الصفحة السابقة
       if (!/data-embed-url|data-embed=|watchButton|data-nume|player_iframe/i.test(html)) {
-        const hop = /<a[^>]+class=["'][^"']*\bxtgo\b[^"']*["'][^>]*href=["']([^"']+)["']/i.exec(html) || /<a[^>]+href=["']([^"']+)["'][^>]*class=["'][^"']*\bxtgo\b/i.exec(html);
+        const hc = ((recipeFor(pageUrl) || {}).hop || 'xtgo').replace(/[^\w-]/g, ''); const hop = new RegExp('<a[^>]+class=["\'][^"\']*\\b' + hc + '\\b[^"\']*["\'][^>]*href=["\']([^"\']+)["\']', 'i').exec(html) || new RegExp('<a[^>]+href=["\']([^"\']+)["\'][^>]*class=["\'][^"\']*\\b' + hc + '\\b', 'i').exec(html);
         if (hop) { const u = abs(hop[1].replace(/&amp;/g, '&'), pageUrl); try { const r2 = await get(u, { headers: { Referer: pageUrl } }); if (okr(r2)) { html = r2.body; page = u; } } catch (e) { } }
       }
       const tpl = await layerTemplate(page, html, o); if (timer) clearTimeout(timer);
@@ -414,7 +423,7 @@
     const SEARCH_TPL = ['/?s={q}', '/search?q={q}', '/search/{q}', '/?search={q}', '/search.php?q={q}', '/?q={q}','/search.php?keywords={q}','/search?keyword={q}','/search/{q}/'];
     async function search(cfg, q) {
       if (cfg.api) { try { const r = await epSearch(cfg.api, q); return { results: r, tpl: 'api' }; } catch (e) { return { results: [], tpl: '' }; } }
-      const home = origin(cfg.home); const tpls = [cfg.searchTpl, ...SEARCH_TPL].filter(Boolean); const seen = new Set();
+      const home = origin(cfg.home); const rc = recipeFor(home); const tpls = [cfg.searchTpl, rc && rc.search, ...SEARCH_TPL].filter(Boolean); const seen = new Set();
       // خط الأساس: روابط الرئيسية (قوائم وأقسام) تُستبعد من النتائج — كما تفعل الإضافات بمحدِّدات بطاقات النتائج
       const base = new Set(); try { const h = await get(home + '/'); if (okr(h)) anchors(h.body, home + '/').forEach(a => base.add(a.url)); } catch (e) { }
       const qw = String(q).toLowerCase().split(/\s+/).filter(w => w.length > 1);
@@ -443,6 +452,14 @@
       if (workUrl.startsWith(EP)) return epEpisodes(epDec(workUrl));
       const r = await get(workUrl); if (!okr(r)) return [];
       if (cf(r.body)) throw new Error('cloudflare');
+      const rc = recipeFor(workUrl);
+      if (rc && rc.episodes && typeof DOMParser !== 'undefined') {
+        try {
+          const d = new DOMParser().parseFromString(r.body, 'text/html'); const out = [];
+          for (const s0 of rc.episodes) { const sel = String(s0).replace(/\[[^\]]*\$\{[^\]]*\]/g, ''); try { d.querySelectorAll(sel + ' a[href], ' + sel + '[href]').forEach(a => { const u = abs(a.getAttribute('href'), workUrl); if (u && !out.includes(u)) out.push(u); }); } catch (e) { } }
+          if (out.length) return out;
+        } catch (e) { }
+      }
       const links = anchors(r.body, workUrl).filter(a => /episode|\/ep[-\/]|حلقة|الحلقة|\/watch|مشاهدة/i.test((() => { try { return decodeURIComponent(a.url) + a.title; } catch (e) { return a.url + a.title; } })()));
       const arr = [];
       for (const a of links) { const n = epNum(a); if (n > 0 && n < 3000 && !arr[n - 1]) arr[n - 1] = a.url; }
@@ -514,7 +531,7 @@
       return out.join('\n\n');
     }
 
-    return { moves: () => Object.assign({}, moves), mapUrl, epSearch, detectApi, diagnose, title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
+    return { moves: () => Object.assign({}, moves), mapUrl, recipeFor, epSearch, detectApi, diagnose, title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
   }
   return { create, unpackAll, findMedia };
 });
