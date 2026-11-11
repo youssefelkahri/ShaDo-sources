@@ -230,7 +230,7 @@
       const t = Date.now(); let urls = [];
       try { urls = await capture(pageUrl, { timeout: 40000 }) || []; } catch (e) { }
       const results = [];
-      for (const u of urls.slice(0, 4)) { const link = { url: u, headers: { Referer: origin(pageUrl) + '/' }, type: /\.m3u8/.test(u) ? 'hls' : 'mp4' }; const v = await verify(link); results.push({ server: 'capture', embed: pageUrl, via: 'capture', link, ok: v.ok, ms: v.ms, err: v.ok ? '' : 'لا يشتغل' }); }
+      for (const c of urls.slice(0, 4)) { const u = typeof c === 'string' ? c : c.url; const h = { Referer: (c && c.referer) || origin(pageUrl) + '/' }; if (c && c.userAgent) h['User-Agent'] = c.userAgent; const link = { url: u, headers: h, type: /\.m3u8/.test(u) ? 'hls' : 'mp4' }; const v = await verify(link); results.push({ server: 'capture', embed: pageUrl, via: 'capture', link, ok: v.ok, ms: v.ms, err: v.ok ? '' : 'لا يشتغل' }); }
       return { layer: 'capture', ms: Date.now() - t, servers: urls.length, good: results.filter(r => r.ok).length, results };
     }
     // الطبقة «API» (easyplex وأشباهه): كشف فقط عبر نمط public/api
