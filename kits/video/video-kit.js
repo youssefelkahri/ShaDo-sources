@@ -111,11 +111,16 @@
       if (!r || r.status >= 400) throw new Error('HTTP ' + (r && r.status || '?'));
       const html = r.body || '';
       if (cf(html)) { const e = new Error('cloudflare'); e.cf = true; throw e; }
-      const urls = findMedia(html + unpackAll(html), embed);
+      let all = html + unpackAll(html);
+      // نصوص مشفّرة بسيطة: atob("..") و\uXXXX و\xXX
+      for (const m of html.matchAll(/atob\(\s*["']([A-Za-z0-9+\/=]{20,})["']\s*\)/g)) all += '\n' + b64(m[1]);
+      if (/\\u00|\\x[0-9a-f]{2}/i.test(all)) all += '\n' + all.replace(/\\u([0-9a-f]{4})/gi, (_, h) => String.fromCharCode(parseInt(h, 16))).replace(/\\x([0-9a-f]{2})/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
+      const urls = findMedia(all, embed);
       if (urls.length) { const o = origin(embed); return { url: urls[0], all: urls, headers: { Referer: o + '/', Origin: o }, type: /\.m3u8/.test(urls[0]) ? 'hls' : 'mp4', via: id || 'generic' }; }
       const inner = depth < 2 && iframeOf(html, embed);
       if (inner && inner !== embed) return extractEmbed(inner, embed, depth + 1);
-      return null;
+      const marks = ['eval(', 'atob(', 'player_token', 'm3u8', 'jwplayer', 'sources', 'hls', 'fetch(', 'XMLHttpRequest', 'data-url', 'video_player'].filter(k => html.includes(k));
+      throw new Error('لا وسائط · ' + r.status + ' · ' + html.length + 'B' + (marks.length ? ' · ' + marks.join(',') : ''));
     }
 
     // ---------- خوادم الحلقة من صفحتها ----------
