@@ -440,9 +440,10 @@
     // تحليل سرعة البحث: كل قالب بحث (الزمن وعدد النتائج). الاستبدال مسموح إن كانت النتائج ≥95% من الحالي وأسرع
     async function compareSearch(cfg, q) {
       const home = origin(cfg.home); const cur = cfg.searchTpl || ''; const rows = [];
+      const bset = new Set(); try { const h = await get(home + '/'); if (okr(h)) anchors(h.body, home + '/').forEach(x => bset.add(x.url)); } catch (e) { }
       for (const t of [...new Set([cur, ...SEARCH_TPL].filter(Boolean))]) {
         const t0 = Date.now(); let n = 0, err = '';
-        try { const r = await get(home + t.replace('{q}', encodeURIComponent(q))); if (okr(r) && !cf(r.body)) n = anchors(r.body, home + '/').filter(x => x.title && x.title.length > 1 && x.title.length < 150).length; else err = 'HTTP ' + (r && r.status); } catch (e) { err = String(e && e.message || e); }
+        try { const r = await get(home + t.replace('{q}', encodeURIComponent(q))); if (okr(r) && !cf(r.body)) n = anchors(r.body, home + '/').filter(x => x.title && x.title.length > 1 && x.title.length < 150 && !bset.has(x.url)).length; else err = 'HTTP ' + (r && r.status); } catch (e) { err = String(e && e.message || e); }
         rows.push({ tpl: t, ms: Date.now() - t0, n, err, cur: t === cur });
         // الموقع لا يستجيب أصلاً (3 مهلات/أخطاء شبكة متتالية): لا فائدة من تجربة بقية القوالب
         const last = rows.slice(-3); if (last.length === 3 && last.every(x => x.n === 0 && /مهلة|timeout|Failed to fetch|network/i.test(x.err))) { rows.push({ tpl: '—', ms: 0, n: 0, err: 'الموقع لا يستجيب — توقّف التحليل', cur: false }); break; }
