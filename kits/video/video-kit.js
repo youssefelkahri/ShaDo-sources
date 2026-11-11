@@ -160,7 +160,7 @@
       let m;
       const rxI = /<iframe[^>]+(?:data-src|data-lazy-src|src)=["']([^"']+)["']/gi; while ((m = rxI.exec(html))) add(m[1], '', 'iframe');
       const rxT = /player_iframe\.location\.href\s*=\s*['"]([^'"]+)['"]/g; while ((m = rxT.exec(html))) add(m[1], '', 'tabs');
-      const rxA = /data-(?:embed|url|src|link|server|iframe|video|href)=["']([^"']+)["']/gi;
+      const rxA = /data-(?:embed-url|embed-id|embed|url|src|link|server|iframe|video|href|watch|stream)=["']([^"']+)["']/gi;
       while ((m = rxA.exec(html))) { let v = m[1]; if (!/^(https?:)?\/\//.test(v) && /^[A-Za-z0-9+\/=]{16,}$/.test(v)) { const d = b64(v); if (/^(https?:)?\/\//.test(d)) v = d; else if (/<iframe/i.test(d)) { const i = iframeOf(d, pageUrl); if (i) v = i; } } if (/^(https?:)?\/\//.test(v)) add(v, '', 'data-attr'); }
       const rxO = /<option[^>]+value=["']([^"']+)["'][^>]*>([^<]*)/gi; while ((m = rxO.exec(html))) { let v = m[1]; if (/^[A-Za-z0-9+\/=]{16,}$/.test(v)) { const d = b64(v); const i = /<iframe/i.test(d) ? iframeOf(d, pageUrl) : (/^https?:/.test(d) ? d : ''); if (i) v = i; } if (/^(https?:)?\/\//.test(v)) add(v, m[2].trim(), 'option'); }
       return out;
@@ -257,7 +257,13 @@
       const useCap = !!capture && o.capture !== false;
       let capP = null; const startCap = () => { if (!capP) { try { o.onStage && o.onStage('capture', 'run'); } catch (e) { } capP = layerCapture(pageUrl); } };
       const timer = useCap ? setTimeout(startCap, o.capDelay === undefined ? 6000 : o.capDelay) : null; // الالتقاط يبدأ بالتوازي إن تأخر القالب
-      const tpl = await layerTemplate(pageUrl, r.body, o); if (timer) clearTimeout(timer);
+      let html = r.body, page = pageUrl;
+      // قفزة «a.xtgo» ونحوها (Bristege): صفحة المشاهدة → صفحة التشغيل، والمُحيل = الصفحة السابقة
+      if (!/data-embed-url|data-embed=|watchButton|data-nume|player_iframe/i.test(html)) {
+        const hop = /<a[^>]+class=["'][^"']*\bxtgo\b[^"']*["'][^>]*href=["']([^"']+)["']/i.exec(html) || /<a[^>]+href=["']([^"']+)["'][^>]*class=["'][^"']*\bxtgo\b/i.exec(html);
+        if (hop) { const u = abs(hop[1].replace(/&amp;/g, '&'), pageUrl); try { const r2 = await get(u, { headers: { Referer: pageUrl } }); if (okr(r2)) { html = r2.body; page = u; } } catch (e) { } }
+      }
+      const tpl = await layerTemplate(page, html, o); if (timer) clearTimeout(timer);
       const layers = [tpl];
       if (!tpl.good && useCap) { startCap(); layers.push(await capP); }
       else if (capP && !o.early) layers.push(await capP);
@@ -371,7 +377,7 @@
       }
       return out;
     }
-    const SEARCH_TPL = ['/?s={q}', '/search?q={q}', '/search/{q}', '/?search={q}', '/search.php?q={q}', '/?q={q}'];
+    const SEARCH_TPL = ['/?s={q}', '/search?q={q}', '/search/{q}', '/?search={q}', '/search.php?q={q}', '/?q={q}','/search.php?keywords={q}','/search?keyword={q}','/search/{q}/'];
     async function search(cfg, q) {
       if (cfg.api) { try { const r = await epSearch(cfg.api, q); return { results: r, tpl: 'api' }; } catch (e) { return { results: [], tpl: '' }; } }
       const home = origin(cfg.home); const tpls = [cfg.searchTpl, ...SEARCH_TPL].filter(Boolean); const seen = new Set();
