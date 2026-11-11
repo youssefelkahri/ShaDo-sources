@@ -38,6 +38,8 @@
       /(?:file|src|source|video_url|hls|url)\s*["']?\s*[:=]\s*["']([^"']+\.(?:m3u8|mp4)[^"']*)["']/gi,
       /sources\s*:\s*\[\s*["']([^"']+)["']/gi,
       /<source[^>]+src=["']([^"']+)["']/gi,
+      /["']?(?:hls\d?|hls_url|stream_url|m3u8)["']?\s*[:=]\s*["']([^"']+)["']/gi,
+      /player\.src\(\s*(?:\{\s*src\s*:\s*)?["']([^"']+)["']/gi,
       /["'](https?:\\?\/\\?\/[^"'\s]+\.(?:m3u8|mp4)(?:\?[^"'\s]*)?)["']/gi,
     ];
     for (const rx of rxs) { let m; while ((m = rx.exec(text))) { const u = abs(m[1], base); if (u && /^https?:/.test(u) && !BAD.test(u)) found.push(u); } }
@@ -52,7 +54,7 @@
     ['streamtape', ['streamtape']], ['dood', ['dood', 'd0o0d']], ['mixdrop', ['mixdrop']], ['okru', ['ok.ru', 'okru']],
     ['streamwish', ['streamwish', 'hgcloud', 'hgplaycdn', 'hglamioz', 'niramirus', 'playnixes', 'medixiru', 'hanerix', 'audinifer', 'vibuxer', 'masukestin']],
     ['filemoon', ['filemoon']], ['filelions', ['filelions']], ['lulustream', ['lulustream', 'luluvdo', 'luluvid']], ['mp4upload', ['mp4upload']],
-    ['uqload', ['uqload']], ['upstream', ['upstream']], ['earnvids', ['earnvids']], ['vidtube', ['vidtube', 'vidoba', 'mp4plus', 'anafast', 'aflam', 'reviewrate', 'vidspeed', '1vid']],
+    ['uqload', ['uqload']], ['voe', ['voe.sx', 'voe-', 'tubeless', 'simpulumlamerop', 'urochsunloath', 'metagnathtuggers']], ['upstream', ['upstream']], ['earnvids', ['earnvids']], ['vidtube', ['vidtube', 'vidoba', 'mp4plus', 'anafast', 'aflam', 'reviewrate', 'vidspeed', '1vid']],
   ];
 
   function create(opts) {
@@ -107,6 +109,29 @@
       },
     };
 
+    special.okru = async function (url) {
+      const r = await get(url.replace('/video/', '/videoembed/'), { headers: { Origin: 'https://ok.ru' } }); if (!okr(r)) return null;
+      const t = r.body.replace(/\\&quot;/g, '"').replace(/&quot;/g, '"').replace(/\\\\/g, '\\').replace(/\\u([0-9A-Fa-f]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+      const hls = (t.match(/"hlsManifestUrl":"([^"]+)"/) || [])[1]; if (hls) return { url: hls.replace(/\\\//g, '/'), headers: { Referer: 'https://ok.ru/' }, type: 'hls' };
+      const m = t.match(/"videos":(\[[^\]]*\])/); if (!m) return null; let v = []; try { v = JSON.parse(m[1]); } catch (e) { return null; }
+      const rank = ['ultra', 'quad', 'full', 'hd', 'sd', 'low', 'lowest', 'mobile']; v.sort((a, b) => rank.indexOf(a.name) - rank.indexOf(b.name));
+      return v[0] && v[0].url ? { url: abs(v[0].url, url), headers: { Referer: 'https://ok.ru/' }, type: 'mp4' } : null;
+    };
+    special.mp4upload = async function (url) {
+      const id = (url.match(/mp4upload\.com\/(?:embed-)?([a-z0-9]+)/i) || [])[1]; if (!id) return null;
+      const e = 'https://www.mp4upload.com/embed-' + id + '.html'; const r = await get(e, { headers: { Referer: 'https://www.mp4upload.com/' } }); if (!okr(r)) return null;
+      const u = findMedia(r.body + unpackAll(r.body), e)[0]; return u ? { url: u, headers: { Referer: 'https://www.mp4upload.com/' }, type: 'mp4' } : null;
+    };
+    special.voe = async function (url) {
+      let r = await get(url); if (!okr(r)) return null; const red = (r.body.match(/window\.location\.href\s*=\s*'([^']+)';/) || [])[1]; if (red) r = await get(red); if (!okr(r)) return null;
+      const enc = (r.body.match(/<script type="application\/json">\s*\["([\s\S]*?)"\]\s*<\/script>/) || [])[1]; if (!enc) { const u = findMedia(r.body, url)[0]; return u ? { url: u, headers: { Referer: origin(url) + '/' }, type: /\.m3u8/.test(u) ? 'hls' : 'mp4' } : null; }
+      try {
+        let x = enc.replace(/[a-zA-Z]/g, c => String.fromCharCode(((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26)));
+        for (const k of ['@$', '^^', '~@', '%?', '*~', '!!', '#&']) x = x.split(k).join('_'); x = x.split('_').join('');
+        x = b64(x); x = x.split('').map(c => String.fromCharCode(c.charCodeAt(0) - 3)).join(''); x = b64(x.split('').reverse().join(''));
+        const j = JSON.parse(x); const u = j.source || j.direct_access_url; return u ? { url: u, headers: { Referer: origin(url) + '/' }, type: /\.m3u8/.test(u) ? 'hls' : 'mp4' } : null;
+      } catch (e) { return null; }
+    };
     // ---------- استخراج رابط من صفحة تضمين ----------
     async function extractEmbed(embed, referer, depth) {
       depth = depth || 0;
@@ -254,6 +279,8 @@
       try { return await Promise.race([scanInner(o, on), dead]); } finally { clearTimeout(to); }
     }
     async function scanInner(o, on) {
+      const apiCfg = await detectApi(o);
+      if (apiCfg) { const rows = [], push = (id, label, status, detail) => { const x = { id, label, status, detail }; rows.push(x); try { on && on(x); } catch (e) { } }; push('api', 'واجهة API (EasyPlex)', 'ok', apiCfg.base); try { const r = await epSearch(apiCfg, 'a'); push('search', 'بحث', r.length ? 'ok' : 'fail', r.length + ' نتيجة'); if (!r.length) return { rows, cfg: null }; const eps = await epEpisodes(epDec(r[0].url)); const st = await epStream(epDec(eps[0])); push('result', 'النتيجة', 'ok', 'رابط صالح · ' + (/\.m3u8/.test(st.url) ? 'HLS' : 'MP4')); return { rows, cfg: { home: apiCfg.base, family: 'easyplex', api: apiCfg }, links: [st] }; } catch (e) { push('result', 'النتيجة', 'fail', String(e && e.message || e)); return { rows, cfg: null }; } }
       const rows = [], push = (id, label, status, detail) => { const x = { id, label, status, detail }; rows.push(x); try { on && on(x); } catch (e) { } return x; };
       const home = origin(o.home);
       const api = await layerApi(home);
@@ -286,6 +313,39 @@
       return { cur: out[0], alts: out.slice(1), all: out };
     }
 
+    // ---------- واجهة EasyPlex (JSON): cfg.api = { base: '.../public/api', key } ----------
+    const EP = 'easyplex://';
+    const epEnc = o => EP + encodeURIComponent(JSON.stringify(o));
+    const epDec = u => { try { return JSON.parse(decodeURIComponent(u.slice(EP.length))); } catch (e) { return null; } };
+    const epKind = t => (/serie|tv/i.test(t) ? 'series' : /anime/i.test(t) ? 'animes' : 'movies');
+    async function epJson(url) { const r = await get(url); if (!okr(r)) throw new Error('HTTP ' + (r && r.status || '?')); return JSON.parse(r.body); }
+    async function epSearch(api, q) {
+      const j = await epJson(api.base + '/search/' + encodeURIComponent(q) + '/' + api.key);
+      const list = Array.isArray(j) ? j : (j.search || j.data || [].concat(j.movies || [], j.series || [], j.animes || []));
+      return list.filter(x => x && x.id && (x.name || x.title)).map(x => ({ title: x.name || x.title, url: epEnc({ api, kind: epKind(x.type || x.kind || ''), id: x.id }), poster: x.poster_path || x.poster || '', tmdb: x.tmdb_id || null }));
+    }
+    async function epShow(o) { return epJson(o.api.base + '/' + o.kind + '/show/' + o.id + '/' + o.api.key); }
+    const epLinks = (videos) => (videos || []).filter(v => v && v.link).map(v => ({ url: v.link, name: v.server || v.lang || '', embed: !!v.embed || /\.html?$|\/e\//.test(v.link) && !/\.(m3u8|mp4)/.test(v.link), headers: Object.assign({}, v.header ? { Referer: v.header } : {}, v.useragent ? { 'User-Agent': v.useragent } : {}) }));
+    async function epEpisodes(o) {
+      const j = await epShow(o);
+      if (o.kind === 'movies') return [epEnc(Object.assign({}, o, { v: 1 }))];
+      const out = [];
+      for (const se of (j.seasons || [])) for (const e of (se.episodes || [])) out.push(epEnc({ api: o.api, kind: o.kind, id: o.id, s: se.season_number || se.id, e: e.episode_number || e.id, eid: e.id }));
+      return out;
+    }
+    async function epStream(o) {
+      const j = await epShow(o); let videos = j.videos;
+      if (o.eid) for (const se of (j.seasons || [])) for (const e of (se.episodes || [])) if (e.id === o.eid) videos = e.videos;
+      const ls = epLinks(videos); const direct = ls.filter(l => !l.embed);
+      for (const l of direct) { const v = await verify({ url: l.url, headers: l.headers, type: /\.m3u8/.test(l.url) ? 'hls' : 'mp4' }); if (v.ok) return { url: l.url, headers: l.headers, res: '', qualities: [], servers: direct }; }
+      for (const l of ls.filter(x => x.embed)) { try { const x = await extractEmbed(l.url, ''); if (x && x.url && (await verify(x)).ok) return { url: x.url, headers: x.headers || {}, res: '', qualities: [], servers: ls }; } catch (e) { } }
+      throw new Error('لا روابط');
+    }
+    async function detectApi(o) { // o.home قد يحمل .../public/api/<key>
+      const m = String(o.home || '').match(/^(https?:\/\/[^?#]*?\/(?:public\/)?api)(?:\/([A-Za-z0-9]{16,}))?\/?$/); if (!m) return null;
+      const key = o.apiKey || m[2]; if (!key) return null; return { base: m[1], key };
+    }
+
     // ---------- واجهة المصدر: بحث + حلقات + تشغيل (يستعملها التطبيق كمصدر عادي) ----------
     const SKIPL = /\/(category|tag|genre|genres|page|author|login|register|contact|about|privacy|dmca|feed|wp-|cdn-cgi)(\/|$)|\.(jpg|jpeg|png|webp|gif|css|js|xml)(\?|$)|^#|^javascript:/i;
     const txt = h => String(h || '').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
@@ -302,6 +362,7 @@
     }
     const SEARCH_TPL = ['/?s={q}', '/search?q={q}', '/search/{q}', '/?search={q}', '/search.php?q={q}', '/?q={q}'];
     async function search(cfg, q) {
+      if (cfg.api) { try { const r = await epSearch(cfg.api, q); return { results: r, tpl: 'api' }; } catch (e) { return { results: [], tpl: '' }; } }
       const home = origin(cfg.home); const tpls = [cfg.searchTpl, ...SEARCH_TPL].filter(Boolean); const seen = new Set();
       for (const t of tpls) {
         if (seen.has(t)) continue; seen.add(t);
@@ -319,6 +380,7 @@
       return m ? +m[1] : 0;
     };
     async function episodes(workUrl) {
+      if (workUrl.startsWith(EP)) return epEpisodes(epDec(workUrl));
       const r = await get(workUrl); if (!okr(r)) return [];
       if (cf(r.body)) throw new Error('cloudflare');
       const links = anchors(r.body, workUrl).filter(a => /episode|\/ep[-\/]|حلقة|الحلقة|\/watch|مشاهدة/i.test((() => { try { return decodeURIComponent(a.url) + a.title; } catch (e) { return a.url + a.title; } })()));
@@ -330,6 +392,7 @@
       return /<iframe|data-nume|player_iframe|data-embed/i.test(r.body) ? [workUrl] : [];
     }
     async function stream(epUrl) {
+      if (epUrl.startsWith(EP)) return epStream(epDec(epUrl));
       const res = await resolveEpisode(epUrl, { capture: true });
       if (!res.ok) throw new Error(res.cf ? 'cloudflare' : (res.error || 'لا روابط'));
       const best = res.links.find(l => l.link.type === 'hls') || res.links[0];
@@ -359,6 +422,7 @@
 
     // معلومات صفحة العمل: العنوان والغلاف والوصف
     async function title(url) {
+      if (url.startsWith(EP)) { const o = epDec(url); const j = await epShow(o); return { title: j.name || j.title || '', cover: j.poster_path || '', description: j.overview || '', eps: await epEpisodes(o) }; }
       const r = await get(url); if (!okr(r)) throw new Error('HTTP ' + (r && r.status || '?'));
       if (cf(r.body)) throw new Error('cloudflare');
       const meta = (n) => { const m = r.body.match(new RegExp('<meta[^>]+(?:property|name)=["\']' + n + '["\'][^>]*content=["\']([^"\']*)["\']', 'i')) || r.body.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]*(?:property|name)=["\']' + n + '["\']', 'i')); return m ? txt(m[1]) : ''; };
@@ -387,7 +451,7 @@
       return out.join('\n\n');
     }
 
-    return { diagnose, title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
+    return { epSearch, detectApi, diagnose, title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
   }
   return { create, unpackAll, findMedia };
 });
