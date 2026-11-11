@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "ShaDo sources",
+  "sources": [
+    {
+      "id": "kolnovel",
+      "name": "ملوك الروايات",
+      "version": 1,
+      "file": "sources/kolnovel.js",
+      "sha256": "8d102b209c0a2da5cb7515ae53a2b06b41ed8c643f44c46239df4b2923d3a561",
+      "minNative": 0,
+      "data": {
+        "id": "kolnovel",
+        "name": "ملوك الروايات",
+        "home": "https://kolnovel.com",
+        "tpl": "mangathemesia",
+        "base": "series",
+        "listings": [
+          [
+            "update",
+            "آخر التحديثات"
+          ],
+          [
+            "popular",
+            "الأكثر شعبية"
+          ]
+        ],
+        "filters": [
+          {
+            "id": "order",
+            "t": "s",
+            "n": "الترتيب",
+            "o": [
+              "الافتراضي",
+              "أ-ي",
+              "ي-أ",
+              "آخر تحديث",
+              "المضافة حديثًا",
+              "الأكثر شعبية"
+            ],
+            "v": [
+              "",
+              "title",
+              "titlereverse",
+              "update",
+              "latest",
+              "popular"
+            ],
+            "sort": 1
+          },
+          {
+            "id": "status",
+            "t": "s",
+            "n": "الحالة",
+            "o": [
+              "الكل",
+              "مستمرة",
+              "مكتملة",
+              "متوقفة"
+            ],
+            "v": [
+              "",
+              "ongoing",
+              "completed",
+              "hiatus"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "novltime",
+      "name": "نوفل تايم",
+      "version": 1,
+      "file": "sources/novltime.js",
+      "sha256": "c6f095b9398a33378cff01173bc10cbb02fd26dd81063f34f7258f016a0f98e2",
+      "minNative": 0,
+      "data": {
+        "id": "novltime",
+        "name": "نوفل تايم",
+        "home": "https://novltime.com/ar",
+        "tpl": "generic",
+        "novelPath": "ar/novel",
+        "lists": {
+          "latest": "/ar/explore?sort=latest",
+          "popular": "/ar/explore?sort=popular"
+        },
+        "search": "/ar/search?q={q}",
+        "chapterRe": "/ar/novel/[^/]+/chapter/[^/?#]+/?$",
+        "mangaRe": "^/ar/novel/[^/?#]+/?$",
+        "listings": [
+          [
+            "latest",
+            "الأحدث"
+          ],
+          [
+            "popular",
+            "الأكثر شعبية"
+          ]
+        ],
+        "filters": []
+      }
+    },
+    {
+      "id": "riwayatarab",
+      "name": "روايات عرب",
+      "version": 1,
+      "file": "sources/riwayatarab.js",
+      "sha256": "493a65aafdd3175de4363d7f9f7f27b480e5f8724894c0a3bc4e23051d52bf14",
+      "minNative": 0,
+      "data": {
+        "id": "riwayatarab",
+        "name": "روايات عرب",
+        "home": "https://riwayatarab.com",
+        "tpl": "generic",
+        "novelPath": "novel",
+        "pageParam": "page",
+        "lists": {
+          "latest": "/latest",
+          "popular": "/search?sort=views"
+        },
+        "search": "/search?q={q}",
+        "chaptersPage": "chapters",
+        "chapterRe": "/novel/[^/]+/chapter/[^/?#]+/?$",
+        "mangaRe": "^/novel/[^/?#]+/?$",
+        "listings": [
+          [
+            "latest",
+            "الأحدث"
+          ],
+          [
+            "popular",
+            "الأكثر مشاهدة"
+          ]
+        ],
+        "filters": []
+      }
+    },
+    {
+      "id": "seanovel",
+      "name": "بحر الروايات",
+      "version": 1,
+      "file": "sources/seanovel.js",
+      "sha256": "eca31d3af0b08e5bdeb83a2730bb3c02171b7543259d9c0afad089d2c4934f55",
+      "minNative": 0,
+      "data": {
+        "id": "seanovel",
+        "name": "بحر الروايات",
+        "home": "https://seanovel.org",
+        "tpl": "generic",
+        "novelPath": "novels",
+        "pageParam": "page",
+        "lists": {
+          "latest": "/search?sort=latest",
+          "popular": "/search?sort=chapters"
+        },
+        "search": "/search?q={q}",
+        "chapterRe": "/novels/[^/]+/chapters/\\d+/?$",
+        "mangaRe": "^/novels/[^/?#]+/?$",
+        "listings": [
+          [
+            "latest",
+            "الأحدث"
+          ],
+          [
+            "popular",
+            "الأكثر فصولًا"
+          ]
+        ],
+        "filters": []
+      }
+    },
+    {
+      "id": "sunovels",
+      "name": "شمس الروايات",
+      "version": 1,
+      "file": "sources/sunovels.js",
+      "sha256": "e2c3158a54af5faa6723a161ce9824f6aa40b15f4fcb07a72662a1396d907bb7",
+      "minNative": 0,
+      "data": {
+        "id": "sunovels",
+        "name": "شمس الروايات",
+        "home": "https://sunovels.com",
+        "tpl": "generic",
+        "novelPath": "novel",
+        "pageParam": "page",
+        "lists": {
+          "latest": "/",
+          "popular": "/library"
+        },
+        "search": "/search?q={q}",
+        "chapterRe": "/novel/[^/]+/\\d+/?$",
+        "mangaRe": "^/novel/[^/?#]+/?$",
+        "listings": [
+          [
+            "popular",
+            "الأشهر"
+          ],
+          [
+            "latest",
+            "الأحدث"
+          ]
+        ],
+        "filters": []
+      }
+    }
+  ]
+}
