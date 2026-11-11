@@ -389,6 +389,7 @@
       const base = new Set(); try { const h = await get(home + '/'); if (okr(h)) anchors(h.body, home + '/').forEach(a => base.add(a.url)); } catch (e) { }
       const qw = String(q).toLowerCase().split(/\s+/).filter(w => w.length > 1);
       const bad = /^(الرئيسية|home|المزيد|more|تسجيل|login)$/i;
+      let dead = 0;
       for (const t of tpls) {
         if (seen.has(t)) continue; seen.add(t);
         try {
@@ -399,7 +400,7 @@
           const cards = list.filter(x => x.poster); if (cards.length >= 1 && cards.length < list.length) list = cards;
           if (hits.length && hits.length < list.length && hits.length >= 1 && list.length > 40) list = hits;
           if (list.length) return { results: list, tpl: t };
-        } catch (e) { }
+        } catch (e) { if (/مهلة|timeout|Failed to fetch|network/i.test(String(e && e.message || e)) && ++dead >= 2) break; }
       }
       return { results: [], tpl: '' };
     }
@@ -443,6 +444,8 @@
         const t0 = Date.now(); let n = 0, err = '';
         try { const r = await get(home + t.replace('{q}', encodeURIComponent(q))); if (okr(r) && !cf(r.body)) n = anchors(r.body, home + '/').filter(x => x.title && x.title.length > 1 && x.title.length < 150).length; else err = 'HTTP ' + (r && r.status); } catch (e) { err = String(e && e.message || e); }
         rows.push({ tpl: t, ms: Date.now() - t0, n, err, cur: t === cur });
+        // الموقع لا يستجيب أصلاً (3 مهلات/أخطاء شبكة متتالية): لا فائدة من تجربة بقية القوالب
+        const last = rows.slice(-3); if (last.length === 3 && last.every(x => x.n === 0 && /مهلة|timeout|Failed to fetch|network/i.test(x.err))) { rows.push({ tpl: '—', ms: 0, n: 0, err: 'الموقع لا يستجيب — توقّف التحليل', cur: false }); break; }
       }
       const base = rows.find(x => x.cur) || { n: 0, ms: 1e9 };
       rows.forEach(x => { x.ok = x.n > 0 && x.n >= 0.95 * base.n && x.n <= 1.5 * Math.max(base.n, 1) + 5; x.faster = !x.cur && x.ok && x.ms < base.ms; x.x = x.ms ? +(base.ms / x.ms).toFixed(1) : 0; });
