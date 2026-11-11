@@ -286,7 +286,65 @@
       return { cur: out[0], alts: out.slice(1), all: out };
     }
 
-    return { hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
+    // ---------- واجهة المصدر: بحث + حلقات + تشغيل (يستعملها التطبيق كمصدر عادي) ----------
+    const SKIPL = /\/(category|tag|genre|genres|page|author|login|register|contact|about|privacy|dmca|feed|wp-|cdn-cgi)(\/|$)|\.(jpg|jpeg|png|webp|gif|css|js|xml)(\?|$)|^#|^javascript:/i;
+    const txt = h => String(h || '').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
+    function anchors(html, base) {
+      const out = [], seen = new Set(); let m; const O = origin(base);
+      const rx = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+      while ((m = rx.exec(html))) {
+        const u = abs(m[1].replace(/&amp;/g, '&'), base); if (!u || origin(u) !== O || SKIPL.test(u) || seen.has(u) || u === base || u === O + '/') continue;
+        const tag = m[0]; const ti = (tag.match(/\btitle=["']([^"']+)["']/i) || [])[1] || (m[2].match(/<img[^>]+alt=["']([^"']+)["']/i) || [])[1] || txt(m[2]);
+        const img = (m[2].match(/<img[^>]+(?:data-src|data-lazy-src|src)=["']([^"']+)["']/i) || [])[1];
+        seen.add(u); out.push({ url: u, title: txt(ti), poster: img ? abs(img, base) : '' });
+      }
+      return out;
+    }
+    const SEARCH_TPL = ['/?s={q}', '/search?q={q}', '/search/{q}', '/?search={q}', '/search.php?q={q}', '/?q={q}'];
+    async function search(cfg, q) {
+      const home = origin(cfg.home); const tpls = [cfg.searchTpl, ...SEARCH_TPL].filter(Boolean); const seen = new Set();
+      for (const t of tpls) {
+        if (seen.has(t)) continue; seen.add(t);
+        try {
+          const r = await get(home + t.replace('{q}', encodeURIComponent(q))); if (!okr(r) || cf(r.body)) continue;
+          const list = anchors(r.body, home + '/').filter(x => x.title && x.title.length > 1 && x.title.length < 150 && !/^(الرئيسية|home|المزيد|more|تسجيل|login)$/i.test(x.title));
+          if (list.length) return { results: list, tpl: t };
+        } catch (e) { }
+      }
+      return { results: [], tpl: '' };
+    }
+    const epNum = (a) => {
+      const d = (() => { try { return decodeURIComponent(a.url); } catch (e) { return a.url; } })();
+      const m = (a.title + ' ' + d).match(/(?:حلقة|الحلقة|episode|ep)[\s\-_:.]*0*(\d{1,4})/i) || d.match(/[-\/_](\d{1,4})\/?$/);
+      return m ? +m[1] : 0;
+    };
+    async function episodes(workUrl) {
+      const r = await get(workUrl); if (!okr(r)) return [];
+      if (cf(r.body)) throw new Error('cloudflare');
+      const links = anchors(r.body, workUrl).filter(a => /episode|\/ep[-\/]|حلقة|الحلقة|\/watch|مشاهدة/i.test((() => { try { return decodeURIComponent(a.url) + a.title; } catch (e) { return a.url + a.title; } })()));
+      const arr = [];
+      for (const a of links) { const n = epNum(a); if (n > 0 && n < 3000 && !arr[n - 1]) arr[n - 1] = a.url; }
+      const have = arr.filter(Boolean).length;
+      if (have) return arr.map(x => x || '');
+      if (links.length) return links.map(a => a.url).reverse();
+      return /<iframe|data-nume|player_iframe|data-embed/i.test(r.body) ? [workUrl] : [];
+    }
+    async function stream(epUrl) {
+      const res = await resolveEpisode(epUrl, { capture: true });
+      if (!res.ok) throw new Error(res.cf ? 'cloudflare' : (res.error || 'لا روابط'));
+      const best = res.links.find(l => l.link.type === 'hls') || res.links[0];
+      const out = res.links.map(l => ({ url: l.link.url, headers: l.link.headers || {}, name: l.server, hls: l.link.type === 'hls' }));
+      return { url: best.link.url, headers: best.link.headers || {}, res: '', qualities: [], servers: out };
+    }
+    // مرايا: إن لم يستجب الموقع جرّب نطاقات معروفة بنفس الاسم
+    async function pickMirror(home, mirrors) {
+      const list = [home, ...(mirrors || [])]; const m = K.mirrors || {};
+      for (const g of Object.values(m)) if (g && g.domains && g.domains.some(d => home.includes(d))) for (const d of g.domains) { const u = 'https://' + d; if (!list.includes(u)) list.push(u); }
+      for (const h of list) { try { const r = await get(h); if (okr(r)) return { home: origin(h), tried: list.indexOf(h) }; } catch (e) { } }
+      return { home: '', tried: list.length };
+    }
+
+    return { search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
   }
   return { create, unpackAll, findMedia };
 });
