@@ -158,7 +158,8 @@ NovelKit.add('sunovels', K => {
     };
 
     // ---------- نص الفصل ----------
-    const clean = p => String(p || '').replace(MARK, '').replace(/\s+/g, ' ').trim();
+    const HEX = /(?<![0-9a-z])[0-9a-f]{20,}(?![0-9a-z])/gi;   // رموز الهاش المحقونة (بدون «شمس الروايات» أحيانًا)
+    const clean = p => String(p || '').replace(MARK, '').replace(HEX, '').replace(/\s+/g, ' ').trim();
     base.chapter = async function (url) {
       const r = await X.req(url, { html: true });
       if (r.status >= 400) throw httpErr(r, url);
