@@ -63,7 +63,12 @@
       ? K.hosters.hosters.map(h => [h.id, h.domains.map(d => baseName(d) || d)])
       : BUILTIN_HOSTERS;
     const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36';
-    const get = async (url, o) => { o = o || {}; o.headers = Object.assign({ 'User-Agent': UA }, o.headers || {}); return net.get(url, o); };
+    const TMO = opts.timeout || 15000;
+    const get = async (url, o) => {
+      o = o || {}; o.headers = Object.assign({ 'User-Agent': UA }, o.headers || {});
+      let t; const lim = new Promise((_, rej) => { t = setTimeout(() => rej(new Error('انتهت المهلة (' + Math.round(TMO / 1000) + 'ث)')), TMO); });
+      try { return await Promise.race([net.get(url, o), lim]); } finally { clearTimeout(t); }
+    };
     const okr = r => r && r.status < 400 && r.body;
     const cf = b => /just a moment|cf-chl|challenge-platform/i.test(String(b || '').slice(0, 4000));
 
@@ -245,6 +250,10 @@
 
     // ---------- المولّد: يكفي رابط الموقع (والحلقة اختيارية) ----------
     async function scan(o, on) {
+      let to; const dead = new Promise(res => { to = setTimeout(() => res({ rows: [{ id: 'timeout', label: 'المهلة الكلية', status: 'fail', detail: 'تجاوز الفحص 90 ثانية' }], cfg: null, links: [] }), 90000); });
+      try { return await Promise.race([scanInner(o, on), dead]); } finally { clearTimeout(to); }
+    }
+    async function scanInner(o, on) {
       const rows = [], push = (id, label, status, detail) => { const x = { id, label, status, detail }; rows.push(x); try { on && on(x); } catch (e) { } return x; };
       const home = origin(o.home);
       const api = await layerApi(home);
