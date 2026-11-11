@@ -202,26 +202,32 @@
     }
 
     // ---------- تشغيل خوادم الحلقة وتجميع الروابط الصالحة ----------
-    async function resolveServers(servers, referer, conc) {
-      const res = []; const q = servers.slice(); conc = conc || 4;
+    async function resolveServers(servers, referer, conc, o) {
+      o = o || {}; const res = []; const q = servers.slice(); conc = conc || 6; let done = false; let wake;
+      const first = new Promise(r => { wake = r; });
+      const cap = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('انتهت المهلة')), ms))]);
       const worker = async () => {
-        while (q.length) {
+        while (q.length && !done) {
           const s = q.shift(); const t = Date.now(); let link = null, err = '';
-          try { link = await extractEmbed(s.url, referer); } catch (e) { err = String(e && e.message || e); }
-          let v = null; if (link) v = await verify(link);
-          res.push({ server: s.name, embed: s.url, via: s.via, link, ok: !!(v && v.ok), ms: Date.now() - t, err: link ? (v && v.ok ? '' : 'لا يشتغل') : (err || 'لم يُستخرج') });
+          try { link = await cap(extractEmbed(s.url, referer), 12000); } catch (e) { err = String(e && e.message || e); }
+          let v = null; if (link && !done) { try { v = await cap(verify(link), 8000); } catch (e) { v = { ok: false }; } }
+          const row = { server: s.name, embed: s.url, via: s.via, link, ok: !!(v && v.ok), ms: Date.now() - t, err: link ? (v && v.ok ? '' : 'لا يشتغل') : (err || 'لم يُستخرج') };
+          res.push(row); try { o.onRow && o.onRow(row); } catch (e) { }
+          if (row.ok && o.early) { done = true; wake(); }
         }
       };
-      await Promise.all(Array.from({ length: conc }, worker));
+      const all = Promise.all(Array.from({ length: conc }, worker));
+      if (o.early) await Promise.race([all, first]); else await all;
       return res.sort((a, b) => (b.ok - a.ok) || (a.ms - b.ms));
     }
 
     // ---------- الطبقات ----------
     // الطبقة «قالب»: iframes/DooPlay/data-attr
-    async function layerTemplate(pageUrl, html) {
+    async function layerTemplate(pageUrl, html, o) {
       const t = Date.now(); let servers = serversFromPage(html, pageUrl); let fam = 'iframe-list';
       if (dooplayItems(html).length) { const d = await dooplayServers(pageUrl, html); if (d.length) { servers = servers.concat(d.filter(x => !servers.some(y => y.url === x.url))); fam = 'dooplay'; } }
-      const results = await resolveServers(servers, pageUrl);
+      try { o && o.onStage && o.onStage('servers', servers.length, fam); } catch (e) { }
+      const results = await resolveServers(servers, pageUrl, 6, o);
       return { layer: 'template', family: fam, ms: Date.now() - t, servers: servers.length, good: results.filter(r => r.ok).length, results };
     }
     // الطبقة «التقاط الشبكة»
@@ -248,9 +254,13 @@
       const r = await get(pageUrl);
       if (!r || r.status >= 400) return { ok: false, error: 'HTTP ' + (r && r.status || '?') };
       if (cf(r.body)) return { ok: false, cf: true, error: 'cloudflare' };
-      const tpl = await layerTemplate(pageUrl, r.body);
+      const useCap = !!capture && o.capture !== false;
+      let capP = null; const startCap = () => { if (!capP) { try { o.onStage && o.onStage('capture', 'run'); } catch (e) { } capP = layerCapture(pageUrl); } };
+      const timer = useCap ? setTimeout(startCap, o.capDelay === undefined ? 6000 : o.capDelay) : null; // الالتقاط يبدأ بالتوازي إن تأخر القالب
+      const tpl = await layerTemplate(pageUrl, r.body, o); if (timer) clearTimeout(timer);
       const layers = [tpl];
-      if (!tpl.good && o.capture !== false) layers.push(await layerCapture(pageUrl));
+      if (!tpl.good && useCap) { startCap(); layers.push(await capP); }
+      else if (capP && !o.early) layers.push(await capP);
       const links = [].concat(...layers.map(l => (l.results || []).filter(x => x.ok).map(x => Object.assign({ layer: l.layer }, x))));
       return { ok: links.length > 0, links, layers };
     }
@@ -275,7 +285,7 @@
 
     // ---------- المولّد: يكفي رابط الموقع (والحلقة اختيارية) ----------
     async function scan(o, on) {
-      let to; const dead = new Promise(res => { to = setTimeout(() => res({ rows: [{ id: 'timeout', label: 'المهلة الكلية', status: 'fail', detail: 'تجاوز الفحص 90 ثانية' }], cfg: null, links: [] }), 90000); });
+      let to; const dead = new Promise(res => { to = setTimeout(() => { const row = { id: 'timeout', label: 'المهلة الكلية', status: 'fail', detail: 'تجاوز الفحص 75 ثانية — الموقع بطيء أو يحتاج التقاط الشبكة' }; try { on && on(row); } catch (e) { } res({ rows: [row], cfg: null, links: [] }); }, 75000); });
       try { return await Promise.race([scanInner(o, on), dead]); } finally { clearTimeout(to); }
     }
     async function scanInner(o, on) {
@@ -292,12 +302,13 @@
       if (!ep) { push('episode', 'حلقة نموذجية', 'fail', (dg ? 'الرئيسية: HTTP ' + dg.status + ' · ' + dg.len + 'B · ' + dg.links + ' رابط · جُرّب ' + dg.tried + (dg.cf ? ' · Cloudflare' : '') + ' — ' : '') + 'ألصق رابط صفحة مشاهدة'); return { rows, cfg: null }; }
       push('episode', 'حلقة نموذجية', 'ok', ep.how + ': ' + decodeURIComponent(ep.url).slice(0, 50));
       if (cf(ep.html)) { push('cf', 'حماية Cloudflare', 'fail', 'يلزم فتح الموقع في المتصفح الداخلي لحلّ التحدّي'); return { rows, cfg: { home, family: 'cloudflare' } }; }
-      const res = await resolveEpisode(ep.url);
-      const tpl = res.layers && res.layers[0];
-      push('servers', 'خوادم الحلقة', tpl && tpl.servers ? 'ok' : 'fail', tpl ? tpl.servers + ' خادماً (' + tpl.family + ')' : 'لا شيء');
-      (tpl ? tpl.results : []).forEach(r => push('srv', r.server || 'خادم', r.ok ? 'ok' : 'fail', (r.via || '') + ' · ' + r.ms + 'ms' + (r.ok ? '' : ' · ' + r.err)));
+      const res = await resolveEpisode(ep.url, {
+        onStage: (k, n, fam) => { if (k === 'servers') push('servers', 'خوادم الحلقة', n ? 'ok' : 'fail', n + ' خادماً (' + fam + ')'); else if (k === 'capture') push('capture', 'التقاط الشبكة', 'run', 'جارٍ فتح الصفحة في المتصفح المخفي…'); },
+        onRow: (r) => push('srv', r.server || 'خادم', r.ok ? 'ok' : 'fail', (r.via || '') + ' · ' + r.ms + 'ms' + (r.ok ? '' : ' · ' + r.err)),
+      });
       const cap = res.layers && res.layers.find(l => l.layer === 'capture');
-      if (cap) push('capture', 'التقاط الشبكة', cap.good ? 'ok' : (cap.skipped ? 'skip' : 'fail'), cap.skipped ? 'غير متاح في هذا التطبيق' : cap.good + ' رابط صالح');
+      if (cap) push('capture', 'نتيجة الالتقاط', cap.good ? 'ok' : (cap.skipped ? 'skip' : 'fail'), cap.skipped ? 'غير متاح في هذا التطبيق' : cap.good + ' رابط صالح');
+      const tpl = res.layers && res.layers[0];
       const good = (res.links || []).length;
       push('result', 'النتيجة', good ? 'ok' : 'fail', good ? good + ' رابط صالح' : 'لا رابط صالح');
       const cfg = { home, family: (tpl && tpl.family) || 'unknown', api: api.detected ? api.base : '', layer: good ? res.links[0].layer : '', sample: ep.url };
@@ -393,7 +404,7 @@
     }
     async function stream(epUrl) {
       if (epUrl.startsWith(EP)) return epStream(epDec(epUrl));
-      const res = await resolveEpisode(epUrl, { capture: true });
+      const res = await resolveEpisode(epUrl, { capture: true, early: true });
       if (!res.ok) throw new Error(res.cf ? 'cloudflare' : (res.error || 'لا روابط'));
       const best = res.links.find(l => l.link.type === 'hls') || res.links[0];
       const out = res.links.map(l => ({ url: l.link.url, headers: l.link.headers || {}, name: l.server, hls: l.link.type === 'hls' }));
