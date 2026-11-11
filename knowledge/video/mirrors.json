@@ -1,0 +1,6 @@
+{
+  "_doc": "نطاقات مرايا معروفة (تتبدّل). التطبيق يجرّب التالي إن تعطّل الحالي ويقبل تعديلاً يدوياً.",
+  "faselhd": { "domains": ["fasel-hd.co", "fasel-hd.cam", "faselhd.cam", "faselhd.center"], "note": "نطاقات وسيطة مثل webNNNNNx.faselhdx.* تتغيّر باستمرار" },
+  "akwam": { "domains": ["akwam.it", "akwam.com.co", "akw.cam"], "note": "go.akwam.* لروابط المشاهدة" },
+  "index": { "faselhd-db": "https://github.com/Ahmd3301/faselhd-db", "note": "فهرس أعمال جاهز (اسم/غلاف/رابط) محدَّث تلقائياً" }
+}

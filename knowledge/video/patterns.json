@@ -1,0 +1,24 @@
+{
+  "_doc": "أنماط مواقع الفيديو وطبقات الاستخراج (بالترتيب: الأسرع أولاً). لكل نمط إشارات كشف وخطوات.",
+  "layers": [
+    { "id": "api", "speed": "fast", "detect": ["/api/ في طلبات الصفحة", "public/api", "wp-json"],
+      "families": [
+        { "id": "easyplex", "signs": ["public/api/search/{q}/0", "حقل tmdb_id في النتائج"], "note": "واجهة Laravel مشتركة بين عدة تطبيقات؛ تُتبدَّل بين عدة مضيفين (مرايا API)" },
+        { "id": "json-custom", "examples": ["cinemana", "Viu", "AnimeRift", "Yacintv"] }
+      ] },
+    { "id": "template", "speed": "medium", "detect": [],
+      "families": [
+        { "id": "dooplay", "signs": ["dooplayer", "doo_player_ajax", "data-nume", "wp-json/dooplayer"], "steps": ["قائمة الخوادم من li[data-nume]", "POST admin-ajax.php action=doo_player_ajax", "iframe من الرد"] },
+        { "id": "iframe-list", "signs": ["iframe[src]", "ul.tabs-ul li onclick player_iframe.location.href"], "steps": ["جمع كل iframe/token", "لكل واحد: المستخرج حسب النطاق"] },
+        { "id": "encoded-servers", "signs": ["base64 في data-*", "AES"], "steps": ["فك base64 ثم تمرير الرابط للمستخرج"] }
+      ] },
+    { "id": "network-capture", "speed": "slow", "detect": ["لا طريقة أسرع"],
+      "how": ["WebView مخفي", "اعتراض fetch/XHR/video.src لأي .m3u8 أو .mp4", "إزالة طبقات تسرق النقر", "الضغط على زر التشغيل", "قراءة قائمة الخوادم من الصفحة"],
+      "limit": "10–45 ثانية؛ احتياط أخير" },
+    { "id": "cloudflare", "when": "الاستجابة 403/تحدّي",
+      "how": ["WebView داخل التطبيق يحلّ التحدّي", "استخراج cf_clearance وUser-Agent نفسه", "إعادة استعماله ~10 دقائق"] }
+  ],
+  "verify": { "ok": "الرابط يعيد 200 وبداية #EXTM3U أو Content-Type فيديو", "score": "عدد الخوادم الصالحة من الإجمالي", "replace_rule": "لا يُستبدل إلا إن لم تنقص الخوادم الصالحة عن 95% من الحالية" },
+  "match": { "key": "tmdb_id", "use": "مطابقة العمل نفسه بين المصادر؛ التبديل التلقائي عند تعطّل مصدر" },
+  "contract": { "getStreams": "(tmdbId, mediaType, season, episode) -> [{url, quality, headers, type}]" }
+}

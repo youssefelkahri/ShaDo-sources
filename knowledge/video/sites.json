@@ -1,0 +1,446 @@
+[
+ {
+  "id": "3isk",
+  "host": "https://3esk.onl",
+  "traits": [
+   "base64",
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "5TV",
+  "host": "https://new61.5tv.lol",
+  "traits": [
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Aflaam",
+  "host": "https://aflaam.com",
+  "traits": [
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Aia2tv 2",
+  "host": "https://ww1.asia2tv.pw",
+  "traits": [
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Akwam",
+  "host": "https://akwam.ss",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Alooytv",
+  "host": "https://fitnur.com/alooytv",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Anim3rb",
+  "host": "https://anime3rb.com",
+  "traits": [
+   "cloudflare",
+   "webview",
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Anime-Phoenix",
+  "host": "https://anime-phoenix.com",
+  "traits": [
+   "admin-ajax",
+   "cloudflare",
+   "webview",
+   "base64",
+   "json-api",
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Anime4up",
+  "host": "https://w1.anime4up.rest",
+  "traits": [
+   "cloudflare",
+   "webview"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "AnimeRift",
+  "host": "https://gateway.embrassme.top/api/v4",
+  "traits": [
+   "base64",
+   "json-api"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Animerco",
+  "host": "https://my.mail.ru",
+  "traits": [
+   "dooplay",
+   "admin-ajax",
+   "cloudflare",
+   "base64",
+   "aes",
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [
+   "MailruExtractor",
+   "VideaExtractor"
+  ],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Animewitcher",
+  "host": "https://animewitcher.com",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Bristege",
+  "host": "https://amd.brstej.com",
+  "traits": [
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Carateen",
+  "host": "https://carateen.tv",
+  "traits": [
+   "aes",
+   "json-api"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Cee",
+  "host": "https://cee.buzz",
+  "traits": [
+   "json-api"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "CimaClub",
+  "host": "https://cimacub.com",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Cimalight",
+  "host": "https://r.cimalight.co",
+  "traits": [
+   "cloudflare",
+   "webview"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Cimatn",
+  "host": "https://www.cimatn.com",
+  "traits": [
+   "aes",
+   "json-api",
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Egy",
+  "host": "",
+  "traits": [
+   "base64"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Egydead",
+  "host": "https://tv10.egydead.live/",
+  "traits": [
+   "cloudflare",
+   "webview",
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Elif",
+  "host": "https://n.elif.news",
+  "traits": [
+   "cloudflare",
+   "webview",
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Faselhd",
+  "host": "https://web11118x.faselhdx.life",
+  "traits": [
+   "admin-ajax",
+   "cloudflare",
+   "webview",
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Krmzy",
+  "host": "https://krmzi.org",
+  "traits": [
+   "cloudflare",
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Lodynet",
+  "host": "https://lodynet.watch",
+  "traits": [
+   "base64",
+   "aes",
+   "json-api",
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "MyCimaProvider",
+  "host": "https://mycima.living",
+  "traits": [
+   "cloudflare",
+   "webview",
+   "base64",
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "OscarTv",
+  "host": "https://ostv-11-11.xyz",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Replaymatch",
+  "host": "https://fullmatchshows.com",
+  "traits": [
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Shahid4u",
+  "host": "https://fastvid.cam",
+  "traits": [
+   "cloudflare",
+   "base64",
+   "json-api",
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [
+   "ExternalEarnVidsExtractor",
+   "ExternalFastVedExtractor"
+  ],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Shahidwbas",
+  "host": "https://w30.shahidwbas.tv",
+  "traits": [
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Syria-live",
+  "host": "https://www.syrlive.com",
+  "traits": [
+   "base64",
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "TVgarden",
+  "host": "https://famelack.com",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Topcinema",
+  "host": "https://web8.topcinema.cam",
+  "traits": [
+   "cloudflare",
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "TukTukcima",
+  "host": "https://tuktukhd.com",
+  "traits": [
+   "base64",
+   "aes",
+   "json-api",
+   "iframe",
+   "packed-js"
+  ],
+  "extractors": [
+   "VideolandExtractor"
+  ],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "TuniflexBlog",
+  "host": "https://ttunflix.blogspot.com",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Tuniflix",
+  "host": "https://tuniflix.site",
+  "traits": [
+   "aes",
+   "json-api",
+   "iframe"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Viu",
+  "host": "https://www.viu.com",
+  "traits": [
+   "json-api"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Wecima",
+  "host": "https://wecima.ac",
+  "traits": [
+   "cloudflare",
+   "base64"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Witanime",
+  "host": "https://drive.google.com",
+  "traits": [
+   "cloudflare",
+   "webview",
+   "base64",
+   "aes",
+   "json-api",
+   "iframe"
+  ],
+  "extractors": [
+   "FourSharedExtractor",
+   "GoFileExtractor",
+   "GoogleDriveExtractor",
+   "MailruExtractor",
+   "MegaExtractor",
+   "VideaExtractor",
+   "VideasExtractor",
+   "VideasFrExtractor",
+   "YonaPlayExtractor"
+  ],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Yacintv",
+  "host": "https://def11.ycnapi.com/api",
+  "traits": [
+   "base64",
+   "aes"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "cinemana",
+  "host": "https://cinemana.shabakaty.cc",
+  "traits": [
+   "json-api"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "dima-toon",
+  "host": "https://www.dima-toon.com",
+  "traits": [
+   "admin-ajax"
+  ],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "eseek",
+  "host": "https://qeseh.net",
+  "traits": [
+   "base64",
+   "iframe"
+  ],
+  "extractors": [
+   "QesehDailymotionExtractor"
+  ],
+  "ref": "Abodabodd/re-3arabi"
+ }
+]

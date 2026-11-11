@@ -1,0 +1,27 @@
+{
+  "_doc": "خوادم الفيديو الشائعة: النطاقات (أي نطاق يطابق يُستخرج بالمستخرج المذكور) وطريقة الاستخراج. المصدر: faselhdx-proxy وCloudStream library وWitAnime.",
+  "hosters": [
+    { "id": "uqload", "domains": ["uqload.net","uqload.cx","uqload.com","uqload.to","uqload.io","uqload.is"], "how": "html-sources", "note": "mp4 مباشر في sources:[...] أو file:" },
+    { "id": "dood", "domains": ["dood.watch","dood.to","dood.so","dood.pm","dood.wf","d0o0d.com"], "how": "pass_md5", "note": "طلب /pass_md5/ ثم إضافة token وزمن؛ يحتاج Referer" },
+    { "id": "streamtape", "domains": ["streamtape.com","streamtape.to"], "how": "robotlink", "note": "تركيب الرابط من عنصر #robotlink أو سلسلة مقسومة في JS" },
+    { "id": "mixdrop", "domains": ["mixdrop.co","mixdrop.to","mixdrop.sx"], "how": "packed-js", "note": "فك eval ثم MDCore.wurl" },
+    { "id": "streamwish", "domains": ["streamwish.fun","streamwish.com","streamwish.to","hgcloud.to","hgplaycdn.com","hglamioz.com","niramirus.com","playnixes.com","medixiru.com","hanerix.com","audinifer.com","vibuxer.com","masukestin.com"], "how": "packed-js+jwplayer", "note": "نطاقات كثيرة تتبدّل؛ تُوحَّد إلى hgplaycdn.com عند الحاجة" },
+    { "id": "filemoon", "domains": ["filemoon.sx","filemoon.to"], "how": "packed-js+jwplayer" },
+    { "id": "filelions", "domains": ["filelions.com","filelions.to"], "how": "packed-js+jwplayer" },
+    { "id": "lulustream", "domains": ["lulustream.com","luluvdo.com","luluvid.com"], "how": "jwplayer", "note": "يحوّل بين النطاقات" },
+    { "id": "mp4upload", "domains": ["mp4upload.com"], "how": "packed-js", "note": "رابط embed-ID.html وReferer مطلوب" },
+    { "id": "upstream", "domains": ["upstream.to"], "how": "packed-js" },
+    { "id": "earnvids", "domains": ["earnvids.xyz"], "how": "packed-js+jwplayer" },
+    { "id": "vidtube", "domains": ["vidtube.one","vidtube.cam","vidtube.pro","vidoba.org","vidoba.site","mp4plus.org","anafast.org","anafast.online","aflam.news","reviewrate.net","vidspeeds.com","vidspeed.org","vidspeed.cc","1vid.xyz"], "how": "packed-js+jwplayer", "note": "عائلة مشغّلات تعتمد JWPlayer وتفتح بتحويلات بين النطاقات" },
+    { "id": "videa", "domains": ["videa.hu","videas.fr","app.videas.fr"], "how": "custom", "note": "XML خاص" },
+    { "id": "mailru", "domains": ["my.mail.ru","cloud.mail.ru"], "how": "custom" },
+    { "id": "gdrive", "domains": ["drive.google.com"], "how": "custom" },
+    { "id": "gofile", "domains": ["gofile.io"], "how": "api" },
+    { "id": "mega", "domains": ["mega.nz"], "how": "custom" }
+  ],
+  "rules": [
+    "روابط HLS قد تكون مربوطة بعنوان IP فتُشغَّل من جهاز المستخدم نفسه لا عبر خادم وسيط.",
+    "كثير من الخوادم يشترط Referer = أصل صفحة التضمين.",
+    "النطاقات تتبدّل أسبوعياً: يُطابَق بالاسم الأساسي لا بالنطاق الكامل."
+  ]
+}

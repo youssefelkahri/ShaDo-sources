@@ -1,0 +1,9 @@
+{
+ "mknov.com": "API: /api/works و /api/works/{id}/chapters؛ نص الفصل مشفّر بخط/شيفرة تُحدَّد من الصفحة (lnreader: mknov.ts)",
+ "galaxynovels.com": "ووردبريس + إضافة قارئ؛ البحث من wp-content/uploads/wor-reader-cache/search/manifest.json؛ النص عبر content_api (lnreader: galaxynovels.ts)",
+ "rewayatfans.com": "ووردبريس REST: /wp-json/wp/v2/pages (الفصول صفحات: slug وcontent) (lnreader: rewayatfans.ts)",
+ "rewayahfans.net": "ووردبريس REST مثل rewayatfans (lnreader: rewayahfans.ts)",
+ "mtlarabic.com": "API/JSON مخصص (lnreader: mtlarabic.ts)",
+ "azorafly.com": "قالب ووردبريس مخصص؛ بحث ?s= لا يعمل فيُطابَق محلياً مع الفهرس (lnreader: azorafly.ts)",
+ "markazriwayat.com": "معطّل في lnreader (broken)"
+}
