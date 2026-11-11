@@ -66,10 +66,40 @@
       : BUILTIN_HOSTERS;
     const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36';
     const TMO = opts.timeout || 15000;
+    // تتبّع انتقال المواقع (فكرة SkyStream): نطاق قديم → نطاق جديد، يُحفظ ويُطبَّق على كل الطلبات
+    const MKEY = 'shado.vid.moves';
+    const moves = (() => { try { return JSON.parse(localStorage.getItem(MKEY) || '{}'); } catch (e) { return {}; } })();
+    const saveMoves = () => { try { localStorage.setItem(MKEY, JSON.stringify(moves)); } catch (e) { } };
+    const orig = u => { try { return new URL(u).origin; } catch (e) { return ''; } };
+    const hostKey = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } };
+    const lev = (a, b) => { const d = Array.from({ length: a.length + 1 }, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j; for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; };
+    const nameOf = u => { const p = hostKey(u).split('.'); return p.length > 1 ? p[p.length - 2] : p[0]; };
+    const sameSite = (a, b) => { const x = nameOf(a), y = nameOf(b); return !!x && !!y && (x === y || (Math.min(x.length, y.length) >= 4 && (lev(x, y) <= 2 || x.includes(y) || y.includes(x)))); }; // brstej ↔ prstej
+    const mapUrl = u => { const o = orig(u), n = o && moves[hostKey(u)]; return n && n !== o ? n + u.slice(o.length) : u; };
+    function noteMove(from, to) {
+      const a = orig(from), b = orig(to); if (!a || !b || a === b) return;
+      if (hostKey(a) === hostKey(b)) return; // http↔https أو www فقط
+      const k = hostKey(a); if (moves[k] === b) return;
+      moves[k] = b; saveMoves(); try { logf('move', k + ' → ' + b); } catch (e) { }
+    }
+    // صفحة «انتقلنا»: meta refresh أو location.href لنطاق آخر بالاسم نفسه
+    function movedTo(r, url) {
+      const b = String(r && r.body || '').slice(0, 6000);
+      const m = b.match(/http-equiv=["']refresh["'][^>]*url=([^"'>\s]+)/i) || b.match(/(?<![\w.])(?:window\.|document\.)?location(?:\.href)?\s*=\s*["'](https?:\/\/[^"']+)["']/i);
+      if (m && b.length < 5000) { const u = m[1]; if (orig(u) && orig(u) !== orig(url) && sameSite(u, url)) return u; }
+      return '';
+    }
     const get = async (url, o) => {
       o = o || {}; o.headers = Object.assign({ 'User-Agent': UA }, o.headers || {});
+      const u = mapUrl(url);
       let t; const lim = new Promise((_, rej) => { t = setTimeout(() => rej(new Error('انتهت المهلة (' + Math.round(TMO / 1000) + 'ث)')), TMO); });
-      try { return await Promise.race([net.get(url, o), lim]); } finally { clearTimeout(t); }
+      try {
+        let r = await Promise.race([net.get(u, o), lim]);
+        if (r && r.url && orig(r.url) && orig(r.url) !== orig(u) && r.status < 400) noteMove(u, r.url); // تحويل HTTP
+        const mv = r && r.status < 400 && movedTo(r, u);
+        if (mv && !o._moved) { noteMove(u, mv); return await get(url, Object.assign({}, o, { _moved: 1 })); }
+        return r;
+      } finally { clearTimeout(t); }
     };
     const okr = r => r && r.status < 400 && r.body;
     const cf = b => /just a moment|cf-chl|challenge-platform/i.test(String(b || '').slice(0, 4000));
@@ -484,7 +514,7 @@
       return out.join('\n\n');
     }
 
-    return { epSearch, detectApi, diagnose, title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
+    return { moves: () => Object.assign({}, moves), mapUrl, epSearch, detectApi, diagnose, title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
   }
   return { create, unpackAll, findMedia };
 });
