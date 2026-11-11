@@ -381,11 +381,19 @@
     async function search(cfg, q) {
       if (cfg.api) { try { const r = await epSearch(cfg.api, q); return { results: r, tpl: 'api' }; } catch (e) { return { results: [], tpl: '' }; } }
       const home = origin(cfg.home); const tpls = [cfg.searchTpl, ...SEARCH_TPL].filter(Boolean); const seen = new Set();
+      // خط الأساس: روابط الرئيسية (قوائم وأقسام) تُستبعد من النتائج — كما تفعل الإضافات بمحدِّدات بطاقات النتائج
+      const base = new Set(); try { const h = await get(home + '/'); if (okr(h)) anchors(h.body, home + '/').forEach(a => base.add(a.url)); } catch (e) { }
+      const qw = String(q).toLowerCase().split(/\s+/).filter(w => w.length > 1);
+      const bad = /^(الرئيسية|home|المزيد|more|تسجيل|login)$/i;
       for (const t of tpls) {
         if (seen.has(t)) continue; seen.add(t);
         try {
           const r = await get(home + t.replace('{q}', encodeURIComponent(q))); if (!okr(r) || cf(r.body)) continue;
-          const list = anchors(r.body, home + '/').filter(x => x.title && x.title.length > 1 && x.title.length < 150 && !/^(الرئيسية|home|المزيد|more|تسجيل|login)$/i.test(x.title));
+          let list = anchors(r.body, home + '/').filter(x => x.title && x.title.length > 1 && x.title.length < 150 && !bad.test(x.title));
+          const fresh = list.filter(x => !base.has(x.url)); if (fresh.length) list = fresh; else if (base.size) list = list.filter(x => qw.some(w => x.title.toLowerCase().includes(w)));
+          const hits = list.filter(x => qw.some(w => x.title.toLowerCase().includes(w)));
+          const cards = list.filter(x => x.poster); if (cards.length >= 1 && cards.length < list.length) list = cards;
+          if (hits.length && hits.length < list.length && hits.length >= 1 && list.length > 40) list = hits;
           if (list.length) return { results: list, tpl: t };
         } catch (e) { }
       }
