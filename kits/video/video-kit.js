@@ -357,7 +357,17 @@
       return { cur: base, rows };
     }
 
-    return { compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
+    // معلومات صفحة العمل: العنوان والغلاف والوصف
+    async function title(url) {
+      const r = await get(url); if (!okr(r)) throw new Error('HTTP ' + (r && r.status || '?'));
+      if (cf(r.body)) throw new Error('cloudflare');
+      const meta = (n) => { const m = r.body.match(new RegExp('<meta[^>]+(?:property|name)=["\']' + n + '["\'][^>]*content=["\']([^"\']*)["\']', 'i')) || r.body.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]*(?:property|name)=["\']' + n + '["\']', 'i')); return m ? txt(m[1]) : ''; };
+      const t = meta('og:title') || txt((r.body.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '') || txt((r.body.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [])[1] || '');
+      const img = meta('og:image'); const ep = await episodes(url);
+      return { title: t.replace(/\s*[-|–]\s*[^-|–]*$/, '') || t, cover: img ? abs(img, url) : '', description: meta('og:description') || meta('description'), eps: ep };
+    }
+
+    return { title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
   }
   return { create, unpackAll, findMedia };
 });
