@@ -367,7 +367,27 @@
       return { title: t.replace(/\s*[-|–]\s*[^-|–]*$/, '') || t, cover: img ? abs(img, url) : '', description: meta('og:description') || meta('description'), eps: ep };
     }
 
-    return { title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
+    // تقرير تشخيص نصي (ينسخه المستخدم ويرسله للمطوّر): عيّنات حقيقية من صفحات الموقع لبناء قالب دقيق
+    async function diagnose(cfg, q) {
+      const out = []; const home = origin(cfg.home); const cut = (h, n) => String(h || '').replace(/\s+/g, ' ').slice(0, n);
+      const step = async (name, fn) => { try { out.push('## ' + name + '\n' + await fn()); } catch (e) { out.push('## ' + name + '\nخطأ: ' + (e && e.message || e)); } };
+      let work = '', epu = '';
+      await step('الرئيسية', async () => { const r = await get(home + '/'); return 'HTTP ' + r.status + ' · ' + String(r.body || '').length + 'B · cf=' + cf(r.body) + '\n' + cut(r.body, 1500); });
+      await step('البحث «' + q + '»', async () => {
+        const s = await search(cfg, q); const f = s.results[0]; if (f) work = f.url;
+        return 'قالب=' + s.tpl + ' · ' + s.results.length + ' نتيجة\n' + s.results.slice(0, 5).map(x => x.title + ' → ' + x.url).join('\n');
+      });
+      await step('صفحة العمل', async () => { if (!work) return 'لا عمل'; const r = await get(work); const eps = await episodes(work); epu = eps.find(Boolean) || ''; return work + '\nHTTP ' + r.status + ' · ' + String(r.body || '').length + 'B\nحلقات=' + eps.length + ' · أولها=' + epu + '\n' + cut(r.body, 1800); });
+      await step('صفحة الحلقة', async () => {
+        const u = epu || work; if (!u) return 'لا حلقة'; const r = await get(u); const sv = serversFromPage(r.body || '', u); const d = dooplayItems(r.body || '');
+        let t = u + '\nHTTP ' + r.status + ' · ' + String(r.body || '').length + 'B · cf=' + cf(r.body) + '\nخوادم=' + sv.length + ' · dooplay=' + d.length + '\n' + sv.slice(0, 6).map(x => x.via + ' ' + x.url).join('\n');
+        for (const x of sv.slice(0, 3)) { try { const e = await get(x.url, { headers: { Referer: u } }); t += '\n--- ' + x.url + ' HTTP ' + e.status + ' ' + String(e.body || '').length + 'B\n' + cut(e.body, 1200); } catch (er) { t += '\n--- ' + x.url + ' خطأ ' + (er && er.message || er); } }
+        return t + '\n--- بداية صفحة الحلقة\n' + cut(r.body, 1500);
+      });
+      return out.join('\n\n');
+    }
+
+    return { diagnose, title, compareSearch, search, episodes, stream, pickMirror, anchors, hosterOf, extractEmbed, serversFromPage, dooplayServers, verify, resolveServers, resolveEpisode, autoEpisode, scan, compare, layerTemplate, layerCapture, layerApi, unpackAll, findMedia };
   }
   return { create, unpackAll, findMedia };
 });
