@@ -104,20 +104,24 @@ NovelKit.add('kolnovel', K => {
       async list(a) {
         if (a.q) {
           if (a.page > 1) return { items: [], hasNext: false };
-          let items = [];
+          let items = [], via = '';
+          const stat = {};
           try {
             const r = await X.postForm(H + '/wp-admin/admin-ajax.php', 'action=ts_ac_do_search&ts_ac_query=' + encodeURIComponent(a.q.trim()).replace(/%20/g, '+'));
             const j = JSON.parse(r.text);
             items = ((j.series && j.series[0] && j.series[0].all) || []).map(e => ({ url: e.post_link, title: clean(e.post_title), cover: e.post_image || '', latest: '' })).filter(x => x.url && x.title);
-          } catch (e) { }
-          if (!items.length) { try { items = cards(await X.html(H + '/?s=' + encodeURIComponent(a.q))); } catch (e) { } }
+            if (items.length) via = 'ajax';
+          } catch (e) { stat.ajax = String(e && e.message || e).slice(0, 80); }
+          if (!items.length) { try { items = cards(await X.html(H + '/?s=' + encodeURIComponent(a.q))); if (items.length) via = 's='; } catch (e) { stat.s = String(e && e.message || e).slice(0, 80); } }
           if (!items.length) {
             try {
               const j = await X.json(H + '/wp-json/app/v2/discover?q=' + encodeURIComponent(a.q.trim()));
               items = ((j && j.data) || []).map(t => ({ url: t.url, title: clean(t.title), cover: t.cover_url || '', latest: '' })).filter(x => x.url && x.title);
-            } catch (e) { }
+              if (items.length) via = 'app/v2'; else stat.v2 = 'فارغ:' + JSON.stringify(j || {}).slice(0, 160);
+            } catch (e) { stat.v2 = String(e && e.message || e).slice(0, 80); }
           }
-          if (!items.length) items = await X.siteSearch(S, a.q).catch(() => []);
+          if (!items.length) { items = await X.siteSearch(S, a.q).catch(() => []); if (items.length) via = 'siteSearch'; }
+          logKol('بحث', { q: a.q, n: items.length, via: via || '-', fail: JSON.stringify(stat) });
           return { items, hasNext: false };
         }
         const f = Object.assign({}, a.f || {});
