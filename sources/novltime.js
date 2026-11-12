@@ -70,6 +70,7 @@ NovelKit.add('novltime', K => {
       }
       return (smCache = out);
     }
+    const clean2 = t => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 150);
     const seenByListing = {};
     base.items = cards;
     base.list = async function (a) {
@@ -82,6 +83,18 @@ NovelKit.add('novltime', K => {
           if (toks.length && toks.every(k => /^[a-z0-9]+$/.test(k))) {
             const sm = (await sitemapSlugs()).filter(sl => { const t = decodeURIComponent(sl).replace(/[-_]+/g, ' ').toLowerCase(); return toks.every(k => t.indexOf(k) >= 0); }).slice(0, 30);
             if (sm.length) { log('بحث من خريطة الموقع', { q: a.q, n: sm.length }); return { items: sm.map(sl => ({ url: workUrl(sl), title: sl.replace(/[-_]+/g, ' '), cover: '', latest: '' })), hasNext: false }; }
+          }
+        } catch (e) { }
+        // 2ب) اسم لاتيني: نبني الرابط مباشرة (reverend insanity -> /ar/novel/reverend-insanity/) ونتحقق أنه موجود
+        try {
+          const toks2 = String(a.q).toLowerCase().replace(/['’]/g, '').split(/[^a-z0-9]+/).filter(Boolean);
+          if (toks2.length && toks2.length <= 8 && !/[^\x00-\x7F]/.test(String(a.q).replace(/[\s\u2019]/g, ''))) {
+            const cands = [toks2.join('-')]; if (toks2[0] === 'the' && toks2.length > 1) cands.push(toks2.slice(1).join('-'));
+            for (const sl of cands) {
+              let d2; try { d2 = await X.html(workUrl(sl)); } catch (e) { continue; }
+              const t = clean2(X.t(sel1(d2, 'h1')) || ''), im = sel1(d2, 'meta[property="og:image"]');
+              if (t) { const it = { url: workUrl(sl), title: t, cover: im ? im.getAttribute('content') || '' : '', latest: '' }; addIdx([it]); log('بحث برابط مباشر', { sl }); return { items: [it], hasNext: false }; }
+            }
           }
         } catch (e) { }
         // نتائج البحث تُرسم بالجافاسكربت (الصفحة الثابتة بلا نتائج): نقرؤها من المتصفح الخفي بعد رسمها
