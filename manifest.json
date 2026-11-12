@@ -104,9 +104,9 @@
     {
       "id": "riwayatarab",
       "name": "روايات عرب",
-      "version": 1,
+      "version": 2,
       "file": "sources/riwayatarab.js",
-      "sha256": "493a65aafdd3175de4363d7f9f7f27b480e5f8724894c0a3bc4e23051d52bf14",
+      "sha256": "ce535247ec13c71645aee8760d94631414e876baf4be52892639b06cbdb92082",
       "minNative": 0,
       "data": {
         "id": "riwayatarab",
