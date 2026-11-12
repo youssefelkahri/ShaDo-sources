@@ -71,7 +71,7 @@ NovelKit.add('novltime', K => {
       return (smCache = out);
     }
     // ---------- واجهة البحث بالمؤشر: /api/v1/search?languages=ar&sort=popular&cursor=…&perPage=20 ----------
-    const apiCur = {};
+    const apiCur = {}, sortOk = {}, apiErr = {};
     let apiShape = false;
     function findItems(j) {
       let best = null;
@@ -100,9 +100,18 @@ NovelKit.add('novltime', K => {
     async function apiPage(sort, page, perPage, extra) {
       const cur = page > 1 ? (apiCur[sort] || {})[page - 1] : '';
       if (page > 1 && !cur) return null;
-      const q = 'languages=ar&sort=' + sort + (cur ? '&cursor=' + encodeURIComponent(cur) : '') + '&perPage=' + (perPage || 20) + (extra ? '&' + extra : '');
-      const r = await X.req(origin + '/api/v1/search?' + q, { headers: { Accept: 'application/json' }, timeout: 20000 });
-      if (r.status >= 400) throw new Error('HTTP ' + r.status);
+      // قيمة الترتيب «الأحدث» غير معروفة (latest تُرجع 400): نجرّب أسماء محتملة مرة واحدة ونحفظ الناجح
+      const cands = sort === 'popular' ? ['popular'] : (sortOk[sort] ? [sortOk[sort]] : [sort, 'updated', 'recent', 'newest', 'new', 'updatedAt', 'createdAt', 'date']);
+      let r = null, used = '';
+      for (const sv of cands) {
+        const q = 'languages=ar&sort=' + sv + (cur ? '&cursor=' + encodeURIComponent(cur) : '') + '&perPage=' + (perPage || 20) + (extra ? '&' + extra : '');
+        r = await X.req(origin + '/api/v1/search?' + q, { headers: { Accept: 'application/json' }, timeout: 20000 });
+        if (r.status < 400) { used = sv; break; }
+        if (!apiErr[sv]) { apiErr[sv] = 1; log('API رفضت الترتيب', { sv, st: r.status, body: String(r.text || '').slice(0, 220) }); }
+        if (r.status !== 400) break;
+      }
+      if (!used) throw new Error('HTTP ' + (r ? r.status : 0));
+      if (sort !== 'popular' && !sortOk[sort]) { sortOk[sort] = used; log('ترتيب API مقبول', { sort, used }); }
       const j = JSON.parse(r.text), arr = findItems(j), next = findCursor(j, arr);
       if (!apiShape) { apiShape = true; log('بنية API البحث', { keys: Object.keys(j || {}).join(','), n: arr.length, next: next ? 'نعم' : 'لا', item: JSON.stringify(arr[0] || {}).slice(0, 350) }); }
       const items = arr.map(it => { const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || it.titleAr || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it), latest: '' } : null; }).filter(Boolean);
