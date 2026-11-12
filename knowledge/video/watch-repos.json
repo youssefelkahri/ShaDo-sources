@@ -1,0 +1,12 @@
+{
+ "_doc": "مستودعات إضافات CloudStream التي يفحصها scan-extensions أسبوعياً. arabic=true: كل مواقعها تُعدّ عربية.",
+ "repos": [
+  { "repo": "Abodabodd/re-3arabi", "arabic": true },
+  { "repo": "NivinCNC/CNCVerse-Cloud-Stream-Extension" },
+  { "repo": "phisher98/cloudstream-extensions-phisher" },
+  { "repo": "recloudstream/extensions" },
+  { "repo": "SaurabhKaperwan/CSX" },
+  { "repo": "hexated/cloudstream-extensions-hexated" },
+  { "repo": "Kraptor123/cs-kraptor" }
+ ]
+}

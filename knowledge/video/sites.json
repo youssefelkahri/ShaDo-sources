@@ -99,7 +99,7 @@
  },
  {
   "id": "Animerco",
-  "host": "https://my.mail.ru",
+  "host": "https://gat.animerco.org",
   "traits": [
    "dooplay",
    "admin-ajax",
@@ -113,7 +113,11 @@
    "MailruExtractor",
    "VideaExtractor"
   ],
-  "ref": "Abodabodd/re-3arabi"
+  "ref": "Abodabodd/re-3arabi",
+  "prev": [
+   "https://my.mail.ru"
+  ],
+  "seen": "2026-11-12"
  },
  {
   "id": "Animewitcher",
@@ -276,7 +280,7 @@
  },
  {
   "id": "Shahid4u",
-  "host": "https://fastvid.cam",
+  "host": "https://shahed4u.im",
   "traits": [
    "cloudflare",
    "base64",
@@ -288,7 +292,11 @@
    "ExternalEarnVidsExtractor",
    "ExternalFastVedExtractor"
   ],
-  "ref": "Abodabodd/re-3arabi"
+  "ref": "Abodabodd/re-3arabi",
+  "prev": [
+   "https://fastvid.cam"
+  ],
+  "seen": "2026-11-12"
  },
  {
   "id": "Shahidwbas",
@@ -381,7 +389,7 @@
  },
  {
   "id": "Witanime",
-  "host": "https://drive.google.com",
+  "host": "https://witanime.site",
   "traits": [
    "cloudflare",
    "webview",
@@ -401,7 +409,11 @@
    "VideasFrExtractor",
    "YonaPlayExtractor"
   ],
-  "ref": "Abodabodd/re-3arabi"
+  "ref": "Abodabodd/re-3arabi",
+  "prev": [
+   "https://drive.google.com"
+  ],
+  "seen": "2026-11-12"
  },
  {
   "id": "Yacintv",
@@ -442,5 +454,14 @@
    "QesehDailymotionExtractor"
   ],
   "ref": "Abodabodd/re-3arabi"
+ },
+ {
+  "id": "Youtube",
+  "name": "YouTube",
+  "host": "https://www.youtube.com",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi",
+  "added": "2026-11-12"
  }
 ]
