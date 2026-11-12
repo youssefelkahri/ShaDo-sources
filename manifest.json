@@ -71,9 +71,9 @@
     {
       "id": "novltime",
       "name": "نوفل تايم",
-      "version": 6,
+      "version": 7,
       "file": "sources/novltime.js",
-      "sha256": "05ff1eff9ca649a699a0391d16a1e99ecbed541d1061cfbe156acb3a7574d13e",
+      "sha256": "43a2cef0db842befa451ff3bf8feb138816a7692f3e552a103092c8443101714",
       "minNative": 0,
       "data": {
         "id": "novltime",
