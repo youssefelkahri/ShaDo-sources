@@ -117,7 +117,7 @@ NovelKit.add('novltime', K => {
       if (sort !== 'popular' && !sortOk[sort]) { sortOk[sort] = used; log('ترتيب API مقبول', { sort, used }); }
       const j = JSON.parse(r.text), arr = findItems(j), next = findCursor(j, arr);
       if (!apiShape) { apiShape = true; log('بنية API البحث', { keys: Object.keys(j || {}).join(','), n: arr.length, next: next ? 'نعم' : 'لا', item: JSON.stringify(arr[0] || {}).slice(0, 350), chKeys: Object.keys(arr[0] || {}).filter(k => /chapter/i.test(k)).join(',') + '=' + chapN(arr[0]) }); }
-      const items = arr.map(it => { if (chapN(it) === 0) { emptyHid++; return null; } const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || it.titleAr || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it), latest: '' } : null; }).filter(Boolean);
+      const items = arr.map(it => { if (chapN(it) === 0) { emptyHid++; return null; } const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || it.titleAr || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it), latest: (chapN(it) > 0 ? chapN(it) + ' فصل' : '') } : null; }).filter(Boolean);
       if (next) (apiCur[sort] = apiCur[sort] || {})[page] = next;
       // بلا مؤشر معروف: نُبقي الصفحة التالية ممكنة (تعود للطريقة القديمة) بدل إنهاء القائمة
       if (emptyHid && page === 1) log('روايات بلا فصول مخفية', { n: emptyHid });
