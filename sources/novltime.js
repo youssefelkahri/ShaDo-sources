@@ -78,7 +78,7 @@ NovelKit.add('novltime', K => {
         const TK = IDX_KEY + '.t';
         let last = 0; try { last = +localStorage.getItem(TK) || 0; } catch (e) { }
         if (Date.now() - last < 864e5 && Object.keys(loadIdx()).length > 150) return;
-        const gs = new Set(['action', 'adventure', 'fantasy', 'romance', 'comedy', 'drama', 'harem', 'martial-arts', 'xianxia', 'xuanhuan', 'wuxia', 'sci-fi', 'mystery', 'horror', 'school-life', 'slice-of-life', 'supernatural', 'historical', 'psychological', 'tragedy', 'josei', 'seinen', 'shounen', 'mature', 'ecchi', 'gender-bender', 'mecha', 'sports', 'adult']);
+        const gs = new Set(['action', 'scifi', 'sliceoflife', 'system', 'horror', 'litrpg', 'mystery', 'drama', 'fantasy', 'historical', 'adventure', 'comedy', 'romance', 'harem', 'martialarts', 'xianxia', 'xuanhuan', 'wuxia', 'supernatural', 'psychological', 'tragedy', 'schoollife', 'mature', 'ecchi', 'josei', 'seinen', 'shounen', 'mecha', 'sports', 'gamelit', 'urban', 'isekai', 'reincarnation']);
         try { const j = await X.json(origin + '/api/v1/genres'); const walk = o => { if (!o || typeof o !== 'object') return; if (Array.isArray(o)) return o.forEach(walk); if (typeof o.slug === 'string' && /^[a-z0-9-]+$/i.test(o.slug)) gs.add(o.slug.toLowerCase()); Object.keys(o).forEach(k => walk(o[k])); }; walk(j); } catch (e) { }
         const list = Array.from(gs); let added = 0, ok = 0;
         for (let i = 0; i < list.length; i += 3) {
