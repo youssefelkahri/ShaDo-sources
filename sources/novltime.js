@@ -41,7 +41,20 @@ NovelKit.add('novltime', K => {
     const seenByListing = {};
     base.items = cards;
     base.list = async function (a) {
-      if (a.q) return Object.assign({ hasNext: false }, await K.TPL.generic(S, { novelPath: 'ar/novel', search: S.search }).list(a));
+      if (a.q) {
+        // نتائج البحث تُرسم بالجافاسكربت (الصفحة الثابتة بلا نتائج): نقرؤها من المتصفح الخفي بعد رسمها
+        if (global.NovelFetch.hasNative() && global.NovelFetch.getList) {
+          try {
+            const q = String(a.q).trim();
+            const r = await global.NovelFetch.getList(origin + '/ar/search?q=' + encodeURIComponent(q), { query: q, force: true, timeout: 30000, mangaRe: '/ar/novel/[^/?#]+/?$' });
+            const by = new Map();
+            (r.items || []).forEach(x => { const sg = novelSegs(x.url); if (sg && sg.length === 1 && x.title) by.set(sg[0], { url: workUrl(sg[0]), title: String(x.title).replace(/\s+/g, ' ').trim().slice(0, 150), cover: x.cover || '', latest: '' }); });
+            log('بحث المتصفح الخفي', { q, n: by.size });
+            if (by.size) return { items: Array.from(by.values()), hasNext: false };
+          } catch (e) { log('بحث المتصفح الخفي فشل', { e: String(e && e.message || e).slice(0, 80) }); }
+        }
+        return Object.assign({ hasNext: false }, await K.TPL.generic(S, { novelPath: 'ar/novel', search: S.search }).list(a));
+      }
       const sort = a.listing === 'latest' ? 'latest' : 'popular', page = a.page || 1;
       const url = origin + '/ar/explore?sort=' + sort + '&language=ar' + (page > 1 ? '&page=' + page : '');
       let items = [];
