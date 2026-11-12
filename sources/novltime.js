@@ -98,7 +98,7 @@ NovelKit.add('novltime', K => {
       try { const u = new URL(c, origin); if (/\/_next\/image/.test(u.pathname) && u.searchParams.get('url')) return new URL(u.searchParams.get('url'), origin).href; return u.href; } catch (e) { return ''; }
     };
     // عدد فصول العنصر إن وُجد حقل رقمي اسمه يحوي chapter (chaptersCount…)؛ null = غير معروف
-    const chapN = it => { let v = null; Object.keys(it || {}).forEach(k => { if (v === null && /chapter/i.test(k) && typeof it[k] === 'number') v = it[k]; }); return v; };
+    const chapN = it => { let v = null; const scan = o => Object.keys(o || {}).forEach(k => { if (v === null && /chapter/i.test(k) && typeof o[k] === 'number') v = o[k]; }); scan(it); if (v === null && it && typeof it.stats === 'object') scan(it.stats); return v; };
     let emptyHid = 0;
     async function apiPage(sort, page, perPage, extra) {
       const cur = page > 1 ? (apiCur[sort] || {})[page - 1] : '';
@@ -116,7 +116,7 @@ NovelKit.add('novltime', K => {
       if (!used) throw new Error('HTTP ' + (r ? r.status : 0));
       if (sort !== 'popular' && !sortOk[sort]) { sortOk[sort] = used; log('ترتيب API مقبول', { sort, used }); }
       const j = JSON.parse(r.text), arr = findItems(j), next = findCursor(j, arr);
-      if (!apiShape) { apiShape = true; log('بنية API البحث', { ch: Object.keys(arr[0] || {}).filter(k => /chapter/i.test(k)).join(',') + '=' + chapN(arr[0]), all: Object.keys(arr[0] || {}).join(','), n: arr.length }); }
+      if (!apiShape) { apiShape = true; log('بنية API البحث', { ch: Object.keys(arr[0] || {}).filter(k => /chapter/i.test(k)).join(',') + '=' + chapN(arr[0]), stats: JSON.stringify((arr[0] || {}).stats || {}).slice(0, 200), n: arr.length }); }
       const items = arr.map(it => { if (chapN(it) === 0) { emptyHid++; return null; } const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || it.titleAr || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it), latest: (chapN(it) > 0 ? chapN(it) + ' فصل' : '') } : null; }).filter(Boolean);
       if (next) (apiCur[sort] = apiCur[sort] || {})[page] = next;
       // بلا مؤشر معروف: نُبقي الصفحة التالية ممكنة (تعود للطريقة القديمة) بدل إنهاء القائمة
