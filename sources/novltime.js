@@ -58,10 +58,14 @@ NovelKit.add('novltime', K => {
         let r; try { r = await X.req(todo[i], {}); } catch (e) { continue; }
         if (!r || r.status >= 400 || !r.text) continue;
         const locs = (r.text.match(/<loc>\s*([^<\s]+)\s*<\/loc>/g) || []).map(x => x.replace(/<\/?loc>/g, '').trim());
+        const before = out.length, xmls = [];
         locs.forEach(u => {
-          if (/\.xml(\?|$)/i.test(u)) { if (todo.length < 12 && !todo.includes(u)) todo.push(u); return; }
-          const sg = novelSegs(u); if (sg && sg.length === 1 && !seenS.has(sg[0])) { seenS.add(sg[0]); out.push(sg[0]); }
+          if (/\.xml(\?|$)/i.test(u)) { xmls.push(u); if (todo.length < 12 && !todo.includes(u)) todo.push(u); return; }
+          // مع بادئة اللغة أو بدونها: /ar/novel/<slug> أو /novel/<slug>
+          let sg = null; try { const ps = new URL(u).pathname.split('/').filter(Boolean), k = ps.indexOf('novel'); if (k >= 0 && ps.length === k + 2) sg = ps[k + 1]; } catch (e) { }
+          if (sg && !seenS.has(sg)) { seenS.add(sg); out.push(sg); }
         });
+        log('sitemap', { f: todo[i].replace(origin, ''), locs: locs.length, novels: out.length - before, xml: xmls.length, sample: locs.slice(0, 2).join(' | ').slice(0, 200) });
         if (out.length) break;
       }
       return (smCache = out);
@@ -122,10 +126,10 @@ NovelKit.add('novltime', K => {
         // بديل: خريطة الموقع (إن فشل زر «تحميل المزيد») — العنوان من الرابط تقريبًا والغلاف يُجلب عند فتح العمل
         try {
           const sm = await sitemapSlugs();
-          const per = 40, start = (page - 2) * per + 44, part = sm.slice(start, start + per).filter(sl => !seen.has(workUrl(sl)));
-          const its = part.map(sl => { const u = workUrl(sl); seen.add(u); return { url: u, title: decodeURIComponent(sl).replace(/[-_]+/g, ' ').trim(), cover: '', latest: '' }; });
-          log('خريطة الموقع ص' + page, { n: its.length, all: sm.length });
-          if (its.length) return { items: its, hasNext: start + per < sm.length };
+          const rest = sm.filter(sl => !seen.has(workUrl(sl))), part = rest.slice(0, 40), I = loadIdx();
+          const its = part.map(sl => { const u = workUrl(sl); seen.add(u); return { url: u, title: (I[sl] && I[sl][0]) || decodeURIComponent(sl).replace(/[-_]+/g, ' ').trim(), cover: (I[sl] && I[sl][1]) || '', latest: '' }; });
+          log('خريطة الموقع ص' + page, { n: its.length, all: sm.length, left: rest.length - its.length });
+          if (its.length) return { items: its, hasNext: rest.length > its.length };
         } catch (e) { log('خريطة الموقع فشلت', { e: String(e && e.message || e) }); }
       }
       return { items: page === 1 ? items : fresh, hasNext: page === 1 ? items.length > 0 : fresh.length > 0 };
