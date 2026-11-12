@@ -139,6 +139,16 @@ NovelKit.add('kolnovel', K => {
         // الفصل الأول الحقيقي: أول عنصر مرقّم (زر «الفصل الأول» في الموقع قد يشير إلى صفحة INFO)
         const first = (pg.items.find(c => !c.sp) || {}).url || (() => { const a = X.byText(d, 'a[href]', ['الفصل الأول']).map(x => X.abs(x.getAttribute('href'), url)).find(h => h && isChUrl(h, new URL(url).origin)); return a ? a.split('#')[0] : ''; })();
         const total = pg.total, firstItems = pg.items;
+        // فحص صامت لواجهة app/v2 (لا يؤثر على الجلب): يسجّل شكل البيانات لنعرف هل تحمل رابط الفصل
+        (async () => {
+          try {
+            const tid = (sel1(d, '[data-kol-series-id]') || { getAttribute: () => '' }).getAttribute('data-kol-series-id') || ((sel1(d, 'article[id^="post-"]') || { id: '' }).id || '').replace('post-', '');
+            if (!tid) return logKol('app/v2: لا معرّف عمل', {});
+            const t0 = Date.now(), j = await X.json(H + '/wp-json/app/v2/titles/' + tid + '/reading-list');
+            const it = (j && j.data && j.data[0]) || {};
+            logKol('app/v2 reading-list', { ms: Date.now() - t0, n: ((j && j.data) || []).length, total: j && j.meta && j.meta.total, keys: Object.keys(it).join(','), sample: JSON.stringify(it).slice(0, 300), page1: (firstItems[0] || {}).url });
+          } catch (e) { logKol('app/v2 فشل', { e: String(e && e.message || e).slice(0, 80) }); }
+        })();
         let cancelled = false;
         logKol('فصول ' + baseOf(url).split('/').filter(Boolean).pop(), { page1: firstItems.length, total, next: pg.hasNext, start: first, sample: JSON.stringify(firstItems.slice(0, 4).map(c => [c.title, c.num, c.sp, c.arc])).slice(0, 400) });
         const res = {
