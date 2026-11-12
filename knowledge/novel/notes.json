@@ -5,5 +5,21 @@
  "rewayahfans.net": "ووردبريس REST مثل rewayatfans (lnreader: rewayahfans.ts)",
  "mtlarabic.com": "API/JSON مخصص (lnreader: mtlarabic.ts)",
  "azorafly.com": "قالب ووردبريس مخصص؛ بحث ?s= لا يعمل فيُطابَق محلياً مع الفهرس (lnreader: azorafly.ts)",
- "markazriwayat.com": "معطّل في lnreader (broken)"
+ "markazriwayat.com": "معطّل في lnreader (broken)",
+ "kolnovel.com": {
+  "checked": "2026-11-12",
+  "engine": "قالب ووردبريس مخصص (مسار الأعمال /series/<slug>/)",
+  "list": "GET /series/?order=update&paged=N — 20 عملاً بالصفحة بأغلفتها (order: update/popular/…)",
+  "search": "admin-ajax يرجع 400؛ البديل wp-json/app/v2/discover?q=",
+  "chapters": [
+   "الأسرع: GET /wp-json/app/v2/titles/<id>/reading-list — 100 فصل بالصفحة، الحقول id,title,published_at,volume,number؛ المعرّف id يؤخذ من صفحة العمل",
+   "احتياطي: GET /series/<slug>/?chapter_volume=__kol_all__&chapter_search&chapter_order=oldest&chapter_page=N (تُجلب الصفحات بالتوازي)",
+   "ملغاة/لا تعمل: /series/<slug>/chapters (404)، POST .../ajax/chapters/ (404)"
+  ],
+  "chapter_text": "GET /wp-json/app/v2/reader/<id> (has_access=false تعني مقفل)؛ احتياطي wp-json/wp/v2/posts/<id>",
+  "chapter_url": "/shaag24<slug>z435ggye-<id>/ — المعرّف الرقمي في آخره",
+  "blocked": "wp-json/wp/v2/* يرجع 403 من التطبيق (حجب)؛ app/v2 مفتوح",
+  "speed": "350 فصلاً في ~3 ثوانٍ؛ 1317 فصلاً في ~17 ثانية",
+  "if_changes": "إن تغيّر app/v2 فالرجوع لـ chapter_page؛ وإن تغيّرا فالمتصفح الخفي مع التقاط الشبكة"
+ }
 }
