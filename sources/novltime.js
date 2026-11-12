@@ -101,8 +101,13 @@ NovelKit.add('novltime', K => {
     const chapN = it => { let v = null; const scan = o => Object.keys(o || {}).forEach(k => { if (v === null && /chapter/i.test(k) && typeof o[k] === 'number') v = o[k]; }); scan(it); if (v === null && it && typeof it.stats === 'object') scan(it.stats); return v; };
     let emptyHid = 0;
     async function apiPage(sort, page, perPage, extra) {
-      const cur = page > 1 ? (apiCur[sort] || {})[page - 1] : '';
-      if (page > 1 && !cur) return null;
+      let cur = page > 1 ? (apiCur[sort] || {})[page - 1] : '';
+      if (page > 1 && !cur) {
+        // حالة ضاعت (تحديث المصدر أثناء الجلسة أو صفحات محفوظة): نعيد بناء سلسلة المؤشرات من الصفحة 1 بدل الرجوع للطريقة القديمة
+        for (let p = 1; p < page; p++) { if ((apiCur[sort] || {})[p]) continue; const r0 = await apiPage(sort, p, perPage, extra); if (!r0) break; }
+        cur = (apiCur[sort] || {})[page - 1];
+        if (!cur) return null;
+      }
       // قيمة الترتيب «الأحدث» غير معروفة (latest تُرجع 400): نجرّب أسماء محتملة مرة واحدة ونحفظ الناجح
       const cands = sort === 'popular' ? ['popular'] : (sortOk[sort] ? [sortOk[sort]] : [sort, 'updated', 'recent', 'newest', 'new', 'updatedAt', 'createdAt', 'date']);
       let r = null, used = '';
