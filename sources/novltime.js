@@ -70,17 +70,68 @@ NovelKit.add('novltime', K => {
       }
       return (smCache = out);
     }
+    // ---------- واجهة البحث بالمؤشر: /api/v1/search?languages=ar&sort=popular&cursor=…&perPage=20 ----------
+    const apiCur = {};
+    let apiShape = false;
+    function findItems(j) {
+      let best = null;
+      const walk = (o, d) => { if (!o || typeof o !== 'object' || d > 4 || best) return; if (Array.isArray(o)) { if (o.length && typeof o[0] === 'object' && o[0] && (o[0].slug || o[0].title || o[0].name)) { best = o; return; } o.forEach(x => walk(x, d + 1)); return; } Object.keys(o).forEach(k => walk(o[k], d + 1)); };
+      walk(j, 0); return best || [];
+    }
+    function findCursor(j, items) {
+      const keys = ['nextCursor', 'next_cursor', 'cursor', 'next'];
+      for (const holder of [j, j && j.meta, j && j.pagination, j && j.pageInfo, j && j.data]) {
+        if (!holder || typeof holder !== 'object' || Array.isArray(holder)) continue;
+        for (const k of keys) if (typeof holder[k] === 'string' && holder[k].length > 20) return holder[k];
+      }
+      let found = ''; const walk = (o, d) => { if (found || !o || typeof o !== 'object' || d > 3 || o === items) return; Object.keys(o).forEach(k => { const v = o[k]; if (!found && typeof v === 'string' && /^eyJ[\w.-]{30,}$/.test(v) && /cursor|next/i.test(k)) found = v; else walk(v, d + 1); }); };
+      walk(j, 0); return found;
+    }
+    const coverOf = it => {
+      let c = it.coverUrl || it.cover_url || it.cover || it.coverImage || it.image || it.thumbnail || it.poster || ''; if (c && typeof c === 'object') c = c.url || c.src || '';
+      if (!c || typeof c !== 'string') return '';
+      try { const u = new URL(c, origin); if (/\/_next\/image/.test(u.pathname) && u.searchParams.get('url')) return new URL(u.searchParams.get('url'), origin).href; return u.href; } catch (e) { return ''; }
+    };
+    async function apiPage(sort, page, perPage, extra) {
+      const cur = page > 1 ? (apiCur[sort] || {})[page - 1] : '';
+      if (page > 1 && !cur) return null;
+      const q = 'languages=ar&sort=' + sort + (cur ? '&cursor=' + encodeURIComponent(cur) : '') + '&perPage=' + (perPage || 20) + (extra ? '&' + extra : '');
+      const r = await X.req(origin + '/api/v1/search?' + q, { headers: { Accept: 'application/json' }, timeout: 20000 });
+      if (r.status >= 400) throw new Error('HTTP ' + r.status);
+      const j = JSON.parse(r.text), arr = findItems(j), next = findCursor(j, arr);
+      if (!apiShape) { apiShape = true; log('بنية API البحث', { keys: Object.keys(j || {}).join(','), n: arr.length, next: next ? 'نعم' : 'لا', item: JSON.stringify(arr[0] || {}).slice(0, 350) }); }
+      const items = arr.map(it => { const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || it.titleAr || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it), latest: '' } : null; }).filter(Boolean);
+      if (next) (apiCur[sort] = apiCur[sort] || {})[page] = next;
+      return { items, hasNext: !!next && items.length > 0 };
+    }
+    async function apiWalk(sort, maxPages) {
+      let n = 0, pg = 1; const key = '__walk' + sort; apiCur[key] = {};
+      let cur = '';
+      for (; pg <= maxPages; pg++) {
+        const q = 'languages=ar&sort=' + sort + (cur ? '&cursor=' + encodeURIComponent(cur) : '') + '&perPage=50';
+        let j; try { const r = await X.req(origin + '/api/v1/search?' + q, { headers: { Accept: 'application/json' }, timeout: 20000 }); if (r.status >= 400) break; j = JSON.parse(r.text); } catch (e) { break; }
+        const arr = findItems(j), next = findCursor(j, arr);
+        const its = arr.map(it => { const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it) } : null; }).filter(Boolean);
+        n += addIdx(its); cur = next;
+        if (!next || !its.length) break;
+        await new Promise(r => setTimeout(r, 250));
+      }
+      return { pages: pg, added: n };
+    }
     // زحف خفيف على صفحات التصنيفات (/ar/genre/<g>: 48 عملًا ثابتة لكل تصنيف) لملء الفهرس المحلي مرة كل 24 ساعة
     let crawling = false;
     async function crawlGenres() {
       if (crawling) return; crawling = true;
       try {
+        const TKA = IDX_KEY + '.a'; let lastA = 0; try { lastA = +localStorage.getItem(TKA) || 0; } catch (e) { }
+        if (Date.now() - lastA > 864e5) { try { const w = await apiWalk('popular', 120); log('زحف API البحث', w); if (w.added) { try { localStorage.setItem(TKA, String(Date.now())); } catch (e) { } } } catch (e) { } }
         const TK = IDX_KEY + '.t';
         let last = 0; try { last = +localStorage.getItem(TK) || 0; } catch (e) { }
         if (Date.now() - last < 864e5 && Object.keys(loadIdx()).length > 150) return;
         const gs = new Set(['action', 'scifi', 'sliceoflife', 'system', 'horror', 'litrpg', 'mystery', 'drama', 'fantasy', 'historical', 'adventure', 'comedy', 'romance', 'harem', 'martialarts', 'xianxia', 'xuanhuan', 'wuxia', 'supernatural', 'psychological', 'tragedy', 'schoollife', 'mature', 'ecchi', 'josei', 'seinen', 'shounen', 'mecha', 'sports', 'gamelit', 'urban', 'isekai', 'reincarnation']);
         try { const j = await X.json(origin + '/api/v1/genres'); const walk = o => { if (!o || typeof o !== 'object') return; if (Array.isArray(o)) return o.forEach(walk); if (typeof o.slug === 'string' && /^[a-z0-9-]+$/i.test(o.slug)) gs.add(o.slug.toLowerCase()); Object.keys(o).forEach(k => walk(o[k])); }; walk(j); } catch (e) { }
-        const list = Array.from(gs); let added = 0, ok = 0;
+        let added = 0, ok = 0;
+        const list = Array.from(gs);
         for (let i = 0; i < list.length; i += 3) {
           await Promise.all(list.slice(i, i + 3).map(async g => { try { const d = await X.html(origin + '/ar/genre/' + g); const c = cards(d); if (c.length) ok++; added += addIdx(c); } catch (e) { } }));
         }
@@ -139,6 +190,10 @@ NovelKit.add('novltime', K => {
         return Object.assign({ hasNext: false }, await K.TPL.generic(S, { novelPath: 'ar/novel', search: S.search }).list(a));
       }
       const sort = a.listing === 'latest' ? 'latest' : 'popular', page = a.page || 1;
+      try {
+        const ar = await apiPage(sort, page, 20);
+        if (ar && ar.items.length) { addIdx(ar.items); log('قائمة API ' + sort + ' ص' + page, { n: ar.items.length, next: ar.hasNext }); return { items: ar.items, hasNext: ar.hasNext }; }
+      } catch (e) { log('قائمة API فشلت', { e: String(e && e.message || e).slice(0, 80) }); }
       const url = origin + '/ar/explore?sort=' + sort + '&language=ar' + (page > 1 ? '&page=' + page : '');
       let items = [];
       if (page === 1) {
