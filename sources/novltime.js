@@ -89,7 +89,12 @@ NovelKit.add('novltime', K => {
     }
     const coverOf = it => {
       let c = it.coverUrl || it.cover_url || it.cover || it.coverImage || it.image || it.thumbnail || it.poster || ''; if (c && typeof c === 'object') c = c.url || c.src || '';
-      if (!c || typeof c !== 'string') return '';
+      if (!c || typeof c !== 'string') {
+        // اسم الحقل غير معروف: ابحث في كل قيم العنصر عن مسار صورة (…/uploads/covers/… أو امتداد صورة)
+        c = ''; const walk = (o, d) => { if (c || !o || typeof o !== 'object' || d > 3) return; Object.keys(o).forEach(k => { const v = o[k]; if (c) return; if (typeof v === 'string' && /(\/uploads\/|covers?\/|\.(jpe?g|png|webp|avif)(\?|$))/i.test(v) && !/avatar/i.test(k)) c = v; else walk(v, d + 1); }); };
+        walk(it, 0);
+        if (!c) return '';
+      }
       try { const u = new URL(c, origin); if (/\/_next\/image/.test(u.pathname) && u.searchParams.get('url')) return new URL(u.searchParams.get('url'), origin).href; return u.href; } catch (e) { return ''; }
     };
     async function apiPage(sort, page, perPage, extra) {
