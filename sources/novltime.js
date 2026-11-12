@@ -66,8 +66,34 @@ NovelKit.add('novltime', K => {
       if (page > 1 && !seen.size) { /* لم تُحمَّل الصفحة الأولى في هذه الجلسة: نقبل الكل */ }
       const fresh = items.filter(x => !seen.has(x.url)); fresh.forEach(x => seen.add(x.url));
       log('قائمة ' + sort + ' ص' + page, { n: items.length, fresh: fresh.length, withCover: fresh.filter(x => x.cover).length });
+      if (page > 1 && !fresh.length) {
+        // بديل: خريطة الموقع (إن فشل زر «تحميل المزيد») — العنوان من الرابط تقريبًا والغلاف يُجلب عند فتح العمل
+        try {
+          const sm = await sitemapSlugs();
+          const per = 40, start = (page - 2) * per + 44, part = sm.slice(start, start + per).filter(sl => !seen.has(workUrl(sl)));
+          const its = part.map(sl => { const u = workUrl(sl); seen.add(u); return { url: u, title: decodeURIComponent(sl).replace(/[-_]+/g, ' ').trim(), cover: '', latest: '' }; });
+          log('خريطة الموقع ص' + page, { n: its.length, all: sm.length });
+          if (its.length) return { items: its, hasNext: start + per < sm.length };
+        } catch (e) { log('خريطة الموقع فشلت', { e: String(e && e.message || e) }); }
+      }
       return { items: page === 1 ? items : fresh, hasNext: page === 1 ? items.length > 0 : fresh.length > 0 };
     };
+    let smCache = null;
+    async function sitemapSlugs() {
+      if (smCache) return smCache;
+      const out = [], seenS = new Set(), todo = ['/sitemap.xml', '/sitemap_index.xml', '/ar/sitemap.xml'].map(p => origin + p);
+      for (let i = 0; i < todo.length && i < 12; i++) {
+        let r; try { r = await X.req(todo[i], {}); } catch (e) { continue; }
+        if (!r || r.status >= 400 || !r.text) continue;
+        const locs = (r.text.match(/<loc>\s*([^<\s]+)\s*<\/loc>/g) || []).map(x => x.replace(/<\/?loc>/g, '').trim());
+        locs.forEach(u => {
+          if (/\.xml(\?|$)/i.test(u)) { if (todo.length < 12 && !todo.includes(u)) todo.push(u); return; }
+          const sg = novelSegs(u); if (sg && sg.length === 1 && !seenS.has(sg[0])) { seenS.add(sg[0]); out.push(sg[0]); }
+        });
+        if (out.length) break;
+      }
+      return (smCache = out);
+    }
 
     // ---------- الفصول ----------
     // نص عنصر فصل (أسطر) -> {pos, title, date}
