@@ -111,6 +111,12 @@ NovelKit.add('kolnovel', K => {
             items = ((j.series && j.series[0] && j.series[0].all) || []).map(e => ({ url: e.post_link, title: clean(e.post_title), cover: e.post_image || '', latest: '' })).filter(x => x.url && x.title);
           } catch (e) { }
           if (!items.length) { try { items = cards(await X.html(H + '/?s=' + encodeURIComponent(a.q))); } catch (e) { } }
+          if (!items.length) {
+            try {
+              const j = await X.json(H + '/wp-json/app/v2/discover?q=' + encodeURIComponent(a.q.trim()));
+              items = ((j && j.data) || []).map(t => ({ url: t.url, title: clean(t.title), cover: t.cover_url || '', latest: '' })).filter(x => x.url && x.title);
+            } catch (e) { }
+          }
           if (!items.length) items = await X.siteSearch(S, a.q).catch(() => []);
           return { items, hasNext: false };
         }
@@ -233,6 +239,15 @@ NovelKit.add('kolnovel', K => {
         if (pg && pg.paras.length >= 3) return pg;
         const m = String(url).split('#')[0].split('?')[0].match(/-(\d+)\/?$/);
         if (m) {
+          try {
+            const rj = await X.json(H + '/wp-json/app/v2/reader/' + m[1]);
+            const html = rj && rj.data && rj.data.entry && rj.data.entry.content;
+            if (rj && rj.data && rj.data.access && rj.data.access.has_access === false) throw new Error('الفصل مقفل في الموقع');
+            if (html) {
+              const ex2 = global.NovelFetch.extractText(X.parse('<html><body><article>' + html + '</article></body></html>', url));
+              if (ex2.paras.length >= 3) return { paras: ex2.paras, title: clean(String(rj.data.entry.title || '').replace(/<[^>]+>/g, '')) || (pg && pg.title) || '', next: pg && pg.next, prev: pg && pg.prev };
+            }
+          } catch (e) { if (/مقفل/.test(String(e && e.message))) throw e; }
           try {
             const j = await X.json(H + '/wp-json/wp/v2/posts/' + m[1]);
             const doc = X.parse('<html><body><article>' + ((j && j.content && j.content.rendered) || '') + '</article></body></html>', url);
