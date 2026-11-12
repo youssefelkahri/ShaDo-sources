@@ -76,6 +76,15 @@ NovelKit.add('riwayatarab', K => {
         let got = have.size;
         if (total && got >= total) { log('الفصول مكتملة محليًا', { have: got, total }); return { got, total, failed: [], skipped: true, contig: o.start || 1 }; }
         const failed = []; let fails = 0, n = Math.max(2, o.start || 2), contig = n - 1, reason = 'done'; const t0 = Date.now();
+        // تعبئة فورية بالأرقام (الروابط عدد متسلسل): القائمة كاملة خلال ثوانٍ، ثم تُحسَّن العناوين من صفحات الفهرس في الخلفية
+        const filled = new Set();
+        const nums = first.map(c => c.num);
+        if (total && total < 20000 && nums.length >= 5 && Math.min.apply(null, nums) === 1 && Math.max.apply(null, nums) === nums.length) {
+          const fresh0 = [];
+          for (let k = 1; k <= total; k++) { const u = chapUrl(slug, k); if (have.has(u)) continue; have.add(u); filled.add(u); fresh0.push({ url: u, title: 'الفصل ' + k, num: k, date: '', o: k, sp: 0 }); }
+          if (fresh0.length && o.onBatch) { try { o.onBatch(fresh0, { got: have.size, total, page: 1, contig: 1 }); } catch (e) { } }
+          log('تعبئة بالأرقام', { added: fresh0.length, total });
+        }
         const fetchPage = async p => {
           for (let t = 0; t < 3; t++) {
             if (res._c) return null;
@@ -83,11 +92,13 @@ NovelKit.add('riwayatarab', K => {
           }
           return null;
         };
-        const take = rows => { const f = rows.filter(c => !have.has(c.url)); f.forEach(c => have.add(c.url)); got = have.size; return f; };
+        const take = rows => { const f = rows.filter(c => !have.has(c.url) || filled.has(c.url)); f.forEach(c => { have.add(c.url); filled.delete(c.url); }); got = have.size; return f; };
+        const pre = new Map();
         for (; n <= pages; n++) {
           if (res._c) { reason = 'cancelled'; break; }
-          await sleep(300);
-          const rows = await fetchPage(n);
+          for (let k = 0; k < 3; k++) if (n + k <= pages && !pre.has(n + k)) pre.set(n + k, fetchPage(n + k));
+          await sleep(100);
+          const rows = await pre.get(n); pre.delete(n);
           if (!rows) { if (res._c) { reason = 'cancelled'; break; } failed.push(n); if (++fails >= 3) { reason = 'failures'; break; } continue; }
           fails = 0;
           const f = take(rows);
