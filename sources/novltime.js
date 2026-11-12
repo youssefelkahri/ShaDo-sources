@@ -70,12 +70,31 @@ NovelKit.add('novltime', K => {
       }
       return (smCache = out);
     }
+    // زحف خفيف على صفحات التصنيفات (/ar/genre/<g>: 48 عملًا ثابتة لكل تصنيف) لملء الفهرس المحلي مرة كل 24 ساعة
+    let crawling = false;
+    async function crawlGenres() {
+      if (crawling) return; crawling = true;
+      try {
+        const TK = IDX_KEY + '.t';
+        let last = 0; try { last = +localStorage.getItem(TK) || 0; } catch (e) { }
+        if (Date.now() - last < 864e5 && Object.keys(loadIdx()).length > 150) return;
+        const gs = new Set(['action', 'adventure', 'fantasy', 'romance', 'comedy', 'drama', 'harem', 'martial-arts', 'xianxia', 'xuanhuan', 'wuxia', 'sci-fi', 'mystery', 'horror', 'school-life', 'slice-of-life', 'supernatural', 'historical', 'psychological', 'tragedy', 'josei', 'seinen', 'shounen', 'mature', 'ecchi', 'gender-bender', 'mecha', 'sports', 'adult']);
+        try { const j = await X.json(origin + '/api/v1/genres'); const walk = o => { if (!o || typeof o !== 'object') return; if (Array.isArray(o)) return o.forEach(walk); if (typeof o.slug === 'string' && /^[a-z0-9-]+$/i.test(o.slug)) gs.add(o.slug.toLowerCase()); Object.keys(o).forEach(k => walk(o[k])); }; walk(j); } catch (e) { }
+        const list = Array.from(gs); let added = 0, ok = 0;
+        for (let i = 0; i < list.length; i += 3) {
+          await Promise.all(list.slice(i, i + 3).map(async g => { try { const d = await X.html(origin + '/ar/genre/' + g); const c = cards(d); if (c.length) ok++; added += addIdx(c); } catch (e) { } }));
+        }
+        try { localStorage.setItem(TK, String(Date.now())); } catch (e) { }
+        log('زحف التصنيفات', { genres: list.length, ok, added, total: Object.keys(loadIdx()).length });
+      } catch (e) { } finally { crawling = false; }
+    }
     const clean2 = t => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 150);
     const seenByListing = {};
     base.items = cards;
     base.list = async function (a) {
       if (a.q) {
         // 1) الفهرس المحلي (عناوين عربية) 2) خريطة الموقع (أسماء لاتينية من الرابط) 3) المتصفح الخفي
+        if (Object.keys(loadIdx()).length < 150) await crawlGenres();
         const hit = searchIdx(a.q);
         if (hit.length) { log('بحث من الفهرس المحلي', { q: a.q, n: hit.length }); return { items: hit, hasNext: false }; }
         try {
@@ -132,7 +151,7 @@ NovelKit.add('novltime', K => {
       // إن تجاهل الموقع معامل الصفحة أعاد القائمة نفسها: نمنع التكرار ونوقف التصفح
       const seen = page === 1 ? (seenByListing[sort] = new Set()) : (seenByListing[sort] = seenByListing[sort] || new Set());
       if (page > 1 && !seen.size) { /* لم تُحمَّل الصفحة الأولى في هذه الجلسة: نقبل الكل */ }
-      addIdx(items);
+      addIdx(items); if (page === 1) setTimeout(crawlGenres, 1500);
       const fresh = items.filter(x => !seen.has(x.url)); fresh.forEach(x => seen.add(x.url));
       log('قائمة ' + sort + ' ص' + page, { n: items.length, fresh: fresh.length, withCover: fresh.filter(x => x.cover).length });
       if (page > 1 && !fresh.length) {
