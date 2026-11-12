@@ -38,10 +38,48 @@ NovelKit.add('novltime', K => {
       });
       return Array.from(map.values()).map(it => { it.title = String(it.title || '').replace(/\s+/g, ' ').trim().slice(0, 150); return it; }).filter(it => it.title.length > 1);
     }
+    // ---------- فهرس محلي للأعمال (عنوان عربي + غلاف) يكبر كلما ظهرت أعمال في القوائم/البحث ----------
+    const IDX_KEY = 'nt.idx.' + new URL(H).hostname;
+    let idx = null, idxT = 0;
+    const loadIdx = () => { if (idx) return idx; try { idx = JSON.parse(localStorage.getItem(IDX_KEY) || '{}') || {}; } catch (e) { idx = {}; } return idx; };
+    const saveIdx = () => { clearTimeout(idxT); idxT = setTimeout(() => { try { localStorage.setItem(IDX_KEY, JSON.stringify(idx)); } catch (e) { } }, 800); };
+    const addIdx = items => { const I = loadIdx(); let n = 0; (items || []).forEach(x => { if (!x || !x.url || !x.title) return; const sg = novelSegs(x.url); if (!sg || sg.length !== 1) return; const o = I[sg[0]]; if (!o || o[2] || (x.cover && !o[1])) { I[sg[0]] = [x.title, x.cover || (o && o[1]) || '']; n++; } }); if (n) saveIdx(); return n; };
+    const searchIdx = q => {
+      const toks = X.normAr(q).split(' ').filter(Boolean); if (!toks.length) return [];
+      const I = loadIdx(), out = [];
+      Object.keys(I).forEach(sl => { const t = X.normAr(I[sl][0] + ' ' + decodeURIComponent(sl).replace(/[-_]+/g, ' ')); if (toks.every(k => t.indexOf(k) >= 0)) out.push({ url: workUrl(sl), title: I[sl][0], cover: I[sl][1] || '', latest: '' }); });
+      return out.slice(0, 60);
+    };
+    let smCache = null;
+    async function sitemapSlugs() {
+      if (smCache) return smCache;
+      const out = [], seenS = new Set(), todo = ['/sitemap.xml', '/sitemap_index.xml', '/ar/sitemap.xml'].map(p => origin + p);
+      for (let i = 0; i < todo.length && i < 12; i++) {
+        let r; try { r = await X.req(todo[i], {}); } catch (e) { continue; }
+        if (!r || r.status >= 400 || !r.text) continue;
+        const locs = (r.text.match(/<loc>\s*([^<\s]+)\s*<\/loc>/g) || []).map(x => x.replace(/<\/?loc>/g, '').trim());
+        locs.forEach(u => {
+          if (/\.xml(\?|$)/i.test(u)) { if (todo.length < 12 && !todo.includes(u)) todo.push(u); return; }
+          const sg = novelSegs(u); if (sg && sg.length === 1 && !seenS.has(sg[0])) { seenS.add(sg[0]); out.push(sg[0]); }
+        });
+        if (out.length) break;
+      }
+      return (smCache = out);
+    }
     const seenByListing = {};
     base.items = cards;
     base.list = async function (a) {
       if (a.q) {
+        // 1) الفهرس المحلي (عناوين عربية) 2) خريطة الموقع (أسماء لاتينية من الرابط) 3) المتصفح الخفي
+        const hit = searchIdx(a.q);
+        if (hit.length) { log('بحث من الفهرس المحلي', { q: a.q, n: hit.length }); return { items: hit, hasNext: false }; }
+        try {
+          const toks = X.normAr(a.q).split(' ').filter(Boolean);
+          if (toks.length && toks.every(k => /^[a-z0-9]+$/.test(k))) {
+            const sm = (await sitemapSlugs()).filter(sl => { const t = decodeURIComponent(sl).replace(/[-_]+/g, ' ').toLowerCase(); return toks.every(k => t.indexOf(k) >= 0); }).slice(0, 30);
+            if (sm.length) { log('بحث من خريطة الموقع', { q: a.q, n: sm.length }); return { items: sm.map(sl => ({ url: workUrl(sl), title: sl.replace(/[-_]+/g, ' '), cover: '', latest: '' })), hasNext: false }; }
+          }
+        } catch (e) { }
         // نتائج البحث تُرسم بالجافاسكربت (الصفحة الثابتة بلا نتائج): نقرؤها من المتصفح الخفي بعد رسمها
         if (global.NovelFetch.hasNative() && global.NovelFetch.getList) {
           try {
@@ -50,7 +88,7 @@ NovelKit.add('novltime', K => {
             const by = new Map();
             (r.items || []).forEach(x => { const sg = novelSegs(x.url); if (sg && sg.length === 1 && x.title) by.set(sg[0], { url: workUrl(sg[0]), title: String(x.title).replace(/\s+/g, ' ').trim().slice(0, 150), cover: x.cover || '', latest: '' }); });
             log('بحث المتصفح الخفي', { q, n: by.size });
-            if (by.size) return { items: Array.from(by.values()), hasNext: false };
+            if (by.size) { addIdx(Array.from(by.values())); return { items: Array.from(by.values()), hasNext: false }; }
           } catch (e) { log('بحث المتصفح الخفي فشل', { e: String(e && e.message || e).slice(0, 80) }); }
         }
         return Object.assign({ hasNext: false }, await K.TPL.generic(S, { novelPath: 'ar/novel', search: S.search }).list(a));
@@ -77,6 +115,7 @@ NovelKit.add('novltime', K => {
       // إن تجاهل الموقع معامل الصفحة أعاد القائمة نفسها: نمنع التكرار ونوقف التصفح
       const seen = page === 1 ? (seenByListing[sort] = new Set()) : (seenByListing[sort] = seenByListing[sort] || new Set());
       if (page > 1 && !seen.size) { /* لم تُحمَّل الصفحة الأولى في هذه الجلسة: نقبل الكل */ }
+      addIdx(items);
       const fresh = items.filter(x => !seen.has(x.url)); fresh.forEach(x => seen.add(x.url));
       log('قائمة ' + sort + ' ص' + page, { n: items.length, fresh: fresh.length, withCover: fresh.filter(x => x.cover).length });
       if (page > 1 && !fresh.length) {
@@ -91,22 +130,7 @@ NovelKit.add('novltime', K => {
       }
       return { items: page === 1 ? items : fresh, hasNext: page === 1 ? items.length > 0 : fresh.length > 0 };
     };
-    let smCache = null;
-    async function sitemapSlugs() {
-      if (smCache) return smCache;
-      const out = [], seenS = new Set(), todo = ['/sitemap.xml', '/sitemap_index.xml', '/ar/sitemap.xml'].map(p => origin + p);
-      for (let i = 0; i < todo.length && i < 12; i++) {
-        let r; try { r = await X.req(todo[i], {}); } catch (e) { continue; }
-        if (!r || r.status >= 400 || !r.text) continue;
-        const locs = (r.text.match(/<loc>\s*([^<\s]+)\s*<\/loc>/g) || []).map(x => x.replace(/<\/?loc>/g, '').trim());
-        locs.forEach(u => {
-          if (/\.xml(\?|$)/i.test(u)) { if (todo.length < 12 && !todo.includes(u)) todo.push(u); return; }
-          const sg = novelSegs(u); if (sg && sg.length === 1 && !seenS.has(sg[0])) { seenS.add(sg[0]); out.push(sg[0]); }
-        });
-        if (out.length) break;
-      }
-      return (smCache = out);
-    }
+
 
     // ---------- الفصول ----------
     // نص عنصر فصل (أسطر) -> {pos, title, date}
