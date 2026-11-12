@@ -177,12 +177,17 @@ NovelKit.add('kolnovel', K => {
             const fresh = pp.items.filter(c => !have.has(c.url)); fresh.forEach(c => { have.add(c.url); if (c.arc) arcs[c.arc] = (arcs[c.arc] || 0) + 1; });
             got = have.size; return fresh;
           };
+          const pre = new Map();
           let n = Math.max(2, o.start || 2), fails = 0, stale = 0, contig = n - 1, hasNext = true;
           const t0 = Date.now(); let reason = 'done';
           while (hasNext && n <= 800) {
             if (cancelled) { reason = 'cancelled'; break; }
-            await sleep(350);
-            const pp = await fetchPage(n);
+            // جلب مسبق لصفحتين تاليتين بالتوازي (حتى عدد الصفحات المتوقع) — يقلّص الزمن بلا تغيير الترتيب
+            const lastPg = total && firstItems.length ? Math.ceil(total / firstItems.length) + 1 : n;
+            for (let k = 0; k < 3; k++) if (n + k <= lastPg && !pre.has(n + k)) pre.set(n + k, fetchPage(n + k));
+            if (!pre.has(n)) pre.set(n, fetchPage(n));
+            await sleep(100);
+            const pp = await pre.get(n); pre.delete(n);
             if (!pp) { if (cancelled) { reason = 'cancelled'; break; } failed.push(n); if (++fails >= 3) { reason = 'failures'; break; } n++; continue; }
             fails = 0;
             const fresh = take(pp, n);
