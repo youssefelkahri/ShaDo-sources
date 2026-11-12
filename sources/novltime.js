@@ -84,7 +84,7 @@ NovelKit.add('novltime', K => {
         if (!holder || typeof holder !== 'object' || Array.isArray(holder)) continue;
         for (const k of keys) if (typeof holder[k] === 'string' && holder[k].length > 20) return holder[k];
       }
-      let found = ''; const walk = (o, d) => { if (found || !o || typeof o !== 'object' || d > 3 || o === items) return; Object.keys(o).forEach(k => { const v = o[k]; if (!found && typeof v === 'string' && /^eyJ[\w.-]{30,}$/.test(v) && /cursor|next/i.test(k)) found = v; else walk(v, d + 1); }); };
+      let found = ''; const walk = (o, d) => { if (found || !o || typeof o !== 'object' || d > 3 || o === items) return; Object.keys(o).forEach(k => { const v = o[k]; if (!found && typeof v === 'string' && /^eyJ[\w.-]{30,}$/.test(v)) found = v; else walk(v, d + 1); }); };
       walk(j, 0); return found;
     }
     const coverOf = it => {
@@ -107,7 +107,8 @@ NovelKit.add('novltime', K => {
       if (!apiShape) { apiShape = true; log('بنية API البحث', { keys: Object.keys(j || {}).join(','), n: arr.length, next: next ? 'نعم' : 'لا', item: JSON.stringify(arr[0] || {}).slice(0, 350) }); }
       const items = arr.map(it => { const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || it.titleAr || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it), latest: '' } : null; }).filter(Boolean);
       if (next) (apiCur[sort] = apiCur[sort] || {})[page] = next;
-      return { items, hasNext: !!next && items.length > 0 };
+      // بلا مؤشر معروف: نُبقي الصفحة التالية ممكنة (تعود للطريقة القديمة) بدل إنهاء القائمة
+      return { items, hasNext: items.length > 0 };
     }
     async function apiWalk(sort, maxPages) {
       let n = 0, pg = 1; const key = '__walk' + sort; apiCur[key] = {};
