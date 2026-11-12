@@ -84,6 +84,15 @@ NovelKit.add('novltime', K => {
         for (let i = 0; i < list.length; i += 3) {
           await Promise.all(list.slice(i, i + 3).map(async g => { try { const d = await X.html(origin + '/ar/genre/' + g); const c = cards(d); if (c.length) ok++; added += addIdx(c); } catch (e) { } }));
         }
+        // خلاصة RSS (آخر ~88 فصلًا): عنوان الرواية قبل « — » ورابطها من رابط الفصل
+        try {
+          const r = await X.req(origin + '/feed.xml', {});
+          if (r && r.status < 400 && r.text) {
+            const its = [], re = /<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>\s*([^<\s]+)\s*<\/link>/g; let m;
+            while ((m = re.exec(r.text))) { const t = m[1].replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").trim(), k = t.lastIndexOf(' — '); const sg = novelSegs(m[2]); if (k > 1 && sg && sg.length >= 1) its.push({ url: workUrl(sg[0]), title: clean2(t.slice(0, k)), cover: '' }); }
+            added += addIdx(its);
+          }
+        } catch (e) { }
         try { localStorage.setItem(TK, String(Date.now())); } catch (e) { }
         log('زحف التصنيفات', { genres: list.length, ok, added, total: Object.keys(loadIdx()).length });
       } catch (e) { } finally { crawling = false; }
