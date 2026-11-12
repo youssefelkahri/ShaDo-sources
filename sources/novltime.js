@@ -97,6 +97,9 @@ NovelKit.add('novltime', K => {
       }
       try { const u = new URL(c, origin); if (/\/_next\/image/.test(u.pathname) && u.searchParams.get('url')) return new URL(u.searchParams.get('url'), origin).href; return u.href; } catch (e) { return ''; }
     };
+    // عدد فصول العنصر إن وُجد حقل رقمي اسمه يحوي chapter (chaptersCount…)؛ null = غير معروف
+    const chapN = it => { let v = null; Object.keys(it || {}).forEach(k => { if (v === null && /chapter/i.test(k) && typeof it[k] === 'number') v = it[k]; }); return v; };
+    let emptyHid = 0;
     async function apiPage(sort, page, perPage, extra) {
       const cur = page > 1 ? (apiCur[sort] || {})[page - 1] : '';
       if (page > 1 && !cur) return null;
@@ -113,11 +116,12 @@ NovelKit.add('novltime', K => {
       if (!used) throw new Error('HTTP ' + (r ? r.status : 0));
       if (sort !== 'popular' && !sortOk[sort]) { sortOk[sort] = used; log('ترتيب API مقبول', { sort, used }); }
       const j = JSON.parse(r.text), arr = findItems(j), next = findCursor(j, arr);
-      if (!apiShape) { apiShape = true; log('بنية API البحث', { keys: Object.keys(j || {}).join(','), n: arr.length, next: next ? 'نعم' : 'لا', item: JSON.stringify(arr[0] || {}).slice(0, 350) }); }
-      const items = arr.map(it => { const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || it.titleAr || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it), latest: '' } : null; }).filter(Boolean);
+      if (!apiShape) { apiShape = true; log('بنية API البحث', { keys: Object.keys(j || {}).join(','), n: arr.length, next: next ? 'نعم' : 'لا', item: JSON.stringify(arr[0] || {}).slice(0, 350), chKeys: Object.keys(arr[0] || {}).filter(k => /chapter/i.test(k)).join(',') + '=' + chapN(arr[0]) }); }
+      const items = arr.map(it => { if (chapN(it) === 0) { emptyHid++; return null; } const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || it.titleAr || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it), latest: '' } : null; }).filter(Boolean);
       if (next) (apiCur[sort] = apiCur[sort] || {})[page] = next;
       // بلا مؤشر معروف: نُبقي الصفحة التالية ممكنة (تعود للطريقة القديمة) بدل إنهاء القائمة
-      return { items, hasNext: items.length > 0 };
+      if (emptyHid && page === 1) log('روايات بلا فصول مخفية', { n: emptyHid });
+      return { items, hasNext: arr.length > 0 };
     }
     async function apiWalk(sort, maxPages) {
       let n = 0, pg = 1; const key = '__walk' + sort; apiCur[key] = {};
@@ -126,7 +130,7 @@ NovelKit.add('novltime', K => {
         const q = 'languages=ar&sort=' + sort + (cur ? '&cursor=' + encodeURIComponent(cur) : '') + '&perPage=50';
         let j; try { const r = await X.req(origin + '/api/v1/search?' + q, { headers: { Accept: 'application/json' }, timeout: 20000 }); if (r.status >= 400) break; j = JSON.parse(r.text); } catch (e) { break; }
         const arr = findItems(j), next = findCursor(j, arr);
-        const its = arr.map(it => { const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it) } : null; }).filter(Boolean);
+        const its = arr.map(it => { if (chapN(it) === 0) return null; const sg = it.slug || (it.url && (novelSegs(it.url) || [])[0]) || ''; const t = clean2(it.title || it.name || ''); return sg && t ? { url: workUrl(sg), title: t, cover: coverOf(it) } : null; }).filter(Boolean);
         n += addIdx(its); cur = next;
         if (!next || !its.length) break;
         await new Promise(r => setTimeout(r, 250));
