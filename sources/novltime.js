@@ -128,7 +128,7 @@ NovelKit.add('novltime', K => {
       // بلا مؤشر معروف: نُبقي الصفحة التالية ممكنة (تعود للطريقة القديمة) بدل إنهاء القائمة
       if (emptyHid && page === 1) log('روايات بلا فصول مخفية', { n: emptyHid });
       const hm = j && j.data && typeof j.data.hasMore === 'boolean' ? j.data.hasMore : undefined;
-      if (sort === 'popular') { items.forEach(it => seenPop.add(it.url)); if (hm === false || (!next && arr.length)) { if (!popDone.end) log('نهاية «الأكثر شعبية»', { page, seen: seenPop.size, total: j && j.data && j.data.total }); popDone.end = popDone.end || page; } }
+      if (sort === 'popular') { items.forEach(it => seenPop.add(it.url)); if (hm === false || (!next && arr.length)) { if (!popDone.end) log('نهاية «الأكثر شعبية»', { page, seen: seenPop.size, total: j && j.data && j.data.total }); popDone.end = popDone.end || (arr.length ? page : page - 1); } }
       return { items, hasNext: sort === 'popular' ? arr.length > 0 : (hm === undefined ? arr.length > 0 : hm) };
     }
     // صفحة قائمة واحدة؛ بعد نهاية «الشعبية» نكمل من «الأحدث» ونحذف ما سبق عرضه
@@ -143,7 +143,10 @@ NovelKit.add('novltime', K => {
         }
         return { items: [], hasNext: false };
       }
-      return apiPage(sort, page, 20);
+      const r0 = await apiPage(sort, page, 20);
+      // صفحة الشعبية الأخيرة فارغة: ننتقل فوراً لذيل «الأحدث» بدل الرجوع للمتصفح الخفي
+      if (sort === 'popular' && popDone.end && page > popDone.end) return listPage(sort, page);
+      return r0;
     }
     async function apiWalk(sort, maxPages) {
       let n = 0, pg = 1; const key = '__walk' + sort; apiCur[key] = {};
