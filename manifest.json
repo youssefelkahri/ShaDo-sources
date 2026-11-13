@@ -5,9 +5,9 @@
     {
       "id": "kolnovel",
       "name": "ملوك الروايات",
-      "version": 5,
+      "version": 6,
       "file": "sources/kolnovel.js",
-      "sha256": "86df9c495ed2868f511b12e53f40d17b60c9e3c46bf903c352973892894a37a7",
+      "sha256": "a37e987d8c26adebd05ae4234c9171e47b29ba9c79e0fbc1ee9bcef0dc3fbd8d",
       "minNative": 0,
       "data": {
         "id": "kolnovel",
