@@ -1,0 +1,63 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAnime3rb.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "MkAnime3rb",
+    "internalName": "MkAnime3rb",
+    "authors": [
+      "Youssef"
+    ],
+    "description": "Anime3rb (مصدر مكتبتي الخاص)",
+    "fileSize": 29440,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "Anime",
+      "AnimeMovie",
+      "OVA"
+    ],
+    "apiVersion": 1,
+    "fileHash": "sha256-b9ae5a0aa210d07f3e5fb6955e0a61903f7c3f32694e0d608aeed3fdae110bce"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkFasel.cs3",
+    "status": 1,
+    "version": 3,
+    "name": "MkFasel",
+    "internalName": "MkFasel",
+    "authors": [
+      "Youssef"
+    ],
+    "description": "فاصل HD (مصدر مكتبتي الخاص)",
+    "fileSize": 58954,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "TvSeries",
+      "Movie"
+    ],
+    "apiVersion": 1,
+    "fileHash": "sha256-98dcc7341497f053a20545746c3e85952780307e4239e0190f01565db353fad1"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkMovieBox.cs3",
+    "status": 1,
+    "version": 9,
+    "name": "MkMovieBox",
+    "internalName": "MkMovieBox",
+    "authors": [
+      "Youssef"
+    ],
+    "description": "MovieBox: أفلام ومسلسلات بترجمات متعددة (مصدر مكتبتي الخاص)",
+    "fileSize": 111824,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "Movie",
+      "TvSeries"
+    ],
+    "apiVersion": 1,
+    "fileHash": "sha256-198051564283b0bab65307518d95207b1e4fe73b264802990d2648d723e71630"
+  }
+]
