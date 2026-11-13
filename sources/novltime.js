@@ -317,6 +317,15 @@ NovelKit.add('novltime', K => {
       const r = await X.req(url, { html: true });
       if (r.status >= 400) throw httpErr(r, url);
       const d = X.parse(r.text, r.url || url), body = X.t(d.body || d.documentElement);
+      // النبذة الكاملة: og:description نصّ SEO («اقرأ رواية… مترجمة… — N فصل. …») ومقصوص، والنبذة الحقيقية كاملة في تبويب «نبذة» من الصفحة
+      function synopsis(d, meta) {
+        const og = meta('og:description') || meta('description');
+        const tail = (og.match(/فصل\.\s+(.+)$/) || [])[1] || og, key = tail.replace(/…$/, '').slice(0, 30);
+        const cands = selA(d, 'p, div, span, section').filter(e => !e.closest('header, footer, nav') && !e.querySelector('p, div, section')).map(e => X.t(e).replace(/\s+/g, ' ').trim())
+          .filter(t => t.length > 60 && t.length < 4000 && !/اقرأ رواية|مترجمة للعربية اونلاين/.test(t) && (!key || t.indexOf(key) === 0));
+        cands.sort((a, b) => b.length - a.length);
+        return cands[0] || tail;
+      }
       const meta = n => ((sel1(d, 'meta[property="' + n + '"],meta[name="' + n + '"]') || {}).content || '').replace(/\s+/g, ' ').trim();
       const title = X.t(sel1(d, 'h1')) || meta('og:title').split(/\s+[|–—-]\s+/)[0];
       const rows = rowsOf(d);
@@ -325,10 +334,10 @@ NovelKit.add('novltime', K => {
       const m1 = body.match(/فصول\s*\(\s*(\d[\d,]*)\s*\)/); if (m1) nums.push(+m1[1].replace(/,/g, ''));
       const m2 = AR(body).match(/(\d[\d,]*)\s*فصل\s*مترجم/); if (m2) nums.push(+m2[1].replace(/,/g, ''));
       const m3 = AR(body).match(/و\s*(\d[\d,]*)\s*فصلاً\s*آخر/); if (m3) nums.push(Object.keys(rows).length + +m3[1].replace(/,/g, ''));
-      const total = Math.max(0, ...nums) || 0;
+      const total = (m1 && +m1[1].replace(/,/g, '')) || Math.max(0, ...nums) || 0; // العدد المعلن في «فصول (N)» هو الأدق؛ تخمين «و148 فصلاً آخر» قد يتضخّم بصفوف غير فصول
       const chapters = Object.keys(rows).map(Number).sort((a, b) => a - b).map(k => rows[k]);
       const rawSlugs = new Set((r.text.match(/\/chapter\/[\w-]+/g) || [])).size;
-      const missing = total ? total - chapters.length : 0;
+      const missing = total ? Math.max(0, total - chapters.length) : 0;
       log('عمل ' + url.split('/').filter(Boolean).pop(), { rows: chapters.length, total, missing, rawSlugs, nextData: /__NEXT_DATA__|__next_f/.test(r.text), first: chapters[0] && chapters[0].url, sample: JSON.stringify(chapters.slice(0, 3).map(c => [c.num, c.title, c.sp])).slice(0, 300) });
       // الغلاف: صور /uploads/covers (تُمرَّر عبر _next/image) قبل أي صورة أخرى
       const imgs = selA(d, 'img').filter(i => !i.closest('header, footer, nav'));
@@ -338,7 +347,7 @@ NovelKit.add('novltime', K => {
         url, start: first ? first.url : '', total, cancel() { res._c = true; },
         title: title.slice(0, 200),
         cover: (cimg && X.img(cimg, url)) || '',
-        summary: meta('og:description') || meta('description'),
+        summary: synopsis(d, meta),
         genres: X.uniqBy(selA(d, 'a[href*="genre"]').filter(a => !a.closest('header, footer, nav')).map(a => ({ t: X.t(a) })).filter(x => x.t && x.t.length < 30), 't').map(x => x.t),
         status: (() => { const g = (body.match(/(منشور|مكتملة?|مستمرة?|متوقفة?)/) || [])[1] || ''; return g === 'منشور' ? 'مستمر' : X.status(g); })(),
         chapters,

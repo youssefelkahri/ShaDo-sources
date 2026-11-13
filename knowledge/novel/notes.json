@@ -37,7 +37,9 @@
   "item": "title, slug, genres, coverURL, stats{views,followers,avgRating,ratingCount,chapterCount}",
   "empty_works": "chapterCount=0 أعمال فارغة (7 من 687 في popular): نخفيها",
   "chapters": "الصفحة تعرض أول ~120 فصلاً مع العدد الكلي، ثم ملء الأرقام chapter-N",
-  "verified": "2026-11-13 بالطلب المباشر"
+  "verified": "2026-11-13 بالطلب المباشر",
+  "synopsis": "og:description نصّ SEO مقصوص («اقرأ رواية… مترجمة للعربية اونلاين مجاناً — N فصل. …»)؛ API يقصّ الوصف عند 300 حرف (description/descriptionShort). النبذة الكاملة في تبويب «نبذة» من الصفحة (أطول عنصر نصي يبدأ بمطلع الوصف). /api/v1/novels/<slug> عام (بدون فصول؛ /chapters يحتاج توكن).",
+  "total_chapters": "العدد المعلن «فصول (2,321)» هو الأدق؛ «و148 فصلاً آخر» + صفوف الصفحة قد يتضخّم (ظهر 2336)"
  },
  "riwayatarab.com": {
   "engine": "Next.js app router (RSC: self.__next_f.push) — بلا واجهة JSON عامة ظاهرة",
