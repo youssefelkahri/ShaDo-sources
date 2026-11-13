@@ -18,8 +18,20 @@ NovelKit.add('cenele', K => {
     const origin = new URL(S.home).origin, API = origin + '/wp-json/nhv/v1';
     const madara = K.TPL.madara(S, { base: 'cont' });
     const J = async u => { const r = await X.req(u, { headers: { Accept: 'application/json' }, timeout: 25000 }); if (r.status >= 400) throw httpErr(r, u); const j = JSON.parse(r.text); if (j && j.success === false) throw new Error((j.error && j.error.message) || 'API'); return j && j.data !== undefined ? j.data : j; };
+    // فهرس slug→id: صفحة العمل قد تُحجب بتحدّي Cloudflare (403) فلا نعتمد عليها؛ المعرّف يأتي من قوائم الواجهة (تُحمَّل كاملة مرة واحدة)
+    const ids = {}; let idsAll = null;
+    try { Object.assign(ids, JSON.parse(localStorage.getItem('cenele.ids') || '{}')); } catch (e) { }
+    const saveIds = () => { try { localStorage.setItem('cenele.ids', JSON.stringify(ids)); } catch (e) { } };
+    const slugFromUrl = u => { try { return decodeURIComponent((new URL(u).pathname.match(/\/cont\/([^\/]+)/) || [])[1] || ''); } catch (e) { return ''; } };
     const isText = it => !it.reader || !it.reader.type || it.reader.type === 'text';
-    const toItem = it => ({ url: it.permalink || (origin + '/cont/' + it.slug + '/'), title: String(it.title || '').trim(), cover: it.cover || '', latest: it.chapters_count ? it.chapters_count + ' فصل' : '' });
+    const toItem = it => { if (it.id && it.slug) ids[decodeURIComponent(it.slug)] = it.id; return ({ url: it.permalink || (origin + '/cont/' + it.slug + '/'), title: String(it.title || '').trim(), cover: it.cover || '', latest: it.chapters_count ? it.chapters_count + ' فصل' : '' }); };
+    function loadAllIds() {
+      return idsAll || (idsAll = (async () => {
+        let n = 0;
+        for (let p = 1; p <= 40; p++) { const d = await J(API + '/library?' + X.qs({ per_page: PER_LIST, page: p, orderby: 'latest' })); (d.items || []).forEach(it => { if (it.id && it.slug) { ids[decodeURIComponent(it.slug)] = it.id; n++; } }); if (p >= (d.total_pages || 1)) break; }
+        saveIds(); log('فهرس المعرّفات', { n }); return n;
+      })().catch(e => { idsAll = null; throw e; }));
+    }
     async function lib(params) {
       const d = await J(API + '/library?' + X.qs(Object.assign({ per_page: PER_LIST }, params)));
       const items = (d.items || []).filter(isText).map(toItem).filter(x => x.title);
@@ -52,11 +64,11 @@ NovelKit.add('cenele', K => {
         return pg;
       },
       async manga(url) {
-        const slug = decodeURIComponent((new URL(url).pathname.match(/\/cont\/([^\/]+)/) || [])[1] || '');
+        const slug = slugFromUrl(url);
         try {
-          const r = await X.req(url, { html: true });
-          if (r.status >= 400) throw httpErr(r, url);
-          const id = (String(r.text).match(/rel=['"]shortlink['"][^>]*[?&]p=(\d+)/) || String(r.text).match(/postid-(\d+)/) || [])[1];
+          let id = ids[slug];
+          if (!id) { try { await loadAllIds(); id = ids[slug]; } catch (e) { } }
+          if (!id) { const r = await X.req(url, { html: true }); if (r.status < 400) id = (String(r.text).match(/rel=['"]shortlink['"][^>]*[?&]p=(\d+)/) || String(r.text).match(/postid-(\d+)/) || [])[1]; }
           if (!id) throw new Error('no id');
           const [w, c1] = await Promise.all([J(API + '/novels/' + id), J(API + '/novels/' + id + '/chapters?order=asc&per_page=' + PER_CH + '&page=1')]);
           const total = +c1.total || (c1.chapters || []).length, pages = +c1.total_pages || 1;

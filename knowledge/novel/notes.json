@@ -55,6 +55,8 @@
   "size": "258 عملاً (library.total)، أول رد في 0.2 ثانية، 609 فصلاً في 3 طلبات",
   "reader_type": "library.items[].reader.type == text للروايات؛ غيره (webtoon) نخفيه",
   "found_by": "استطلاع wp-json (namespaces → routes) — بلا تخمين",
-  "verified": "2026-11-13 بالطلب المباشر"
+  "verified": "2026-11-13 بالطلب المباشر",
+  "cloudflare": "صفحة العمل /cont/<slug>/ تُرجع 403 تحدّي Cloudflare للطلبات الأصلية من الجهاز (تعمل من أماكن أخرى)، بينما wp-json وقوائم ?s= تعمل 200: لا نعتمد صفحة العمل؛ فهرس slug→id من /library.",
+  "ota_lesson": "مصدر جديد بنسخة 1 في manifest يُتجاهل في التطبيق (النسخة 1 تُعدّ مدمجة): ابدأ من نسخة 2."
  }
 }

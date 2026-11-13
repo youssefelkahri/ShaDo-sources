@@ -207,9 +207,9 @@
     {
       "id": "cenele",
       "name": "سينيل",
-      "version": 1,
+      "version": 2,
       "file": "sources/cenele.js",
-      "sha256": "a85ec7f0cda4696395652ffed548b8bb902db82c905df5ecb4fd48bd4551249a",
+      "sha256": "50fd734ef42cc9669f1d3bc3c95bf59138d1a3cf31ca84c3a56a33d007aceddf",
       "minNative": 0,
       "data": {
         "id": "cenele",
