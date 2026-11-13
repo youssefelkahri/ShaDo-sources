@@ -1,0 +1,21 @@
+name: Novel sources health
+# فحص أسبوعي: هل ما زالت مواقع الروايات تعمل؟ أو تحوّلت إلى نطاق جديد؟
+on:
+  schedule:
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tools/novel-health/health.js
+      - run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions"; git config user.email "actions@github.com"
+            git add novels/health.json
+            git commit -m "novel-health: $(date +%F) [skip ci]" && git push
+          fi

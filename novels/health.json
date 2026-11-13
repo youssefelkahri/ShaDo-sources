@@ -1,0 +1,41 @@
+{
+  "checked": "2026-11-13",
+  "sources": {
+    "kolnovel": {
+      "status": 200,
+      "ok": true,
+      "blocked": false,
+      "fails": 0
+    },
+    "novltime": {
+      "status": 200,
+      "ok": true,
+      "blocked": false,
+      "fails": 0
+    },
+    "riwayatarab": {
+      "status": 200,
+      "ok": true,
+      "blocked": false,
+      "fails": 0
+    },
+    "seanovel": {
+      "status": 200,
+      "ok": true,
+      "blocked": false,
+      "fails": 0
+    },
+    "sunovels": {
+      "status": 200,
+      "ok": true,
+      "blocked": false,
+      "fails": 0
+    },
+    "cenele": {
+      "status": 200,
+      "ok": true,
+      "blocked": false,
+      "fails": 0
+    }
+  }
+}
