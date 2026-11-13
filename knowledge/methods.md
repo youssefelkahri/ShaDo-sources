@@ -47,3 +47,17 @@
 ## واجهة وردبريس التطبيقية (درس kolnovel)
 - `wp-json/app/v2/{reading-list,titles,discover,reader/<id>}` عامة في بعض مواقع kolnovel؛ `reader` يُرجع `has_access` (مغلق إن كان false).
 - جلب صفحات القائمة بالتوازي (3 صفحات مسبقاً) يخفّض 1300 فصل من دقائق إلى ~17 ثانية.
+
+## دليل الاستطلاع: الأدلة قبل التخمين (للمولّد)
+المبدأ: كل طلب مُخمَّن مكلف (الخيوط الأصلية 6 فقط) وأغلبه 404. نجمع الأدلة من الموقع نفسه أولاً، ثم نخمّن بميزانية صغيرة.
+| الدليل | أين يُرى | ماذا نستنتج |
+|---|---|---|
+| وردبريس | `/wp-json/` فيه `namespaces`+`routes` أو `<link rel="https://api.w.org/">` | نقرأ مسارات chapter/reading/search/discover من الفهرس (مثل `app/v2` في kolnovel) بدل تخمينها؛ قد يكون الفهرس 403 والمسارات مفتوحة |
+| مسارات API في الشيفرة | نصوص `"/api/..."` و`https://api.*` داخل سكربتات الصفحة وأول 4 حزم JS | تُقدَّم كبادئات أولى للتخمين، وتُرفع الميزانية من 60 إلى 420 طلباً |
+| Next RSC | `self.__next_f.push` بلا `__NEXT_DATA__` ولا مسارات api | الموقع مرسوم من الخادم: نحلّل HTML فقط ولا نخمّن API (riwayatarab) |
+| Next (pages) | `__NEXT_DATA__` + `/_next/data/<buildId>/…json` | بيانات الصفحة JSON جاهزة |
+| Nuxt | `__NUXT__`, `/_nuxt/`, `_payload.json` | الحمولة تحوي القوائم |
+| نموذج البحث | `form[role=search]` أو `input[name=s|q|query|keyword|…]` + الحقول المخفية | رابط البحث يُبنى من النموذج (kolnovel: `?s=&post_type=series`) |
+| OpenSearch | `<link rel="search" type="application/opensearchdescription+xml">` | القالب `{searchTerms}` جاهز |
+| حدود الترتيب | `hasMore=false` مبكراً في sort الشعبية | نكمل بترتيب آخر يغطي الكل ونحذف المكرر (novltime: popular 687 من 1273، newest كله) |
+قاعدة إيقاف: بلا أدلة وتخمين 60 طلباً فاشلاً → نتوقف ونكمل بتحليل HTML. التنفيذ: `NovelApiDisc.scout` (www/sources/apidisc.js) و`declaredSearch` (www/sources/search.js).

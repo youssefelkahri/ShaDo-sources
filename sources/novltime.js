@@ -100,6 +100,7 @@ NovelKit.add('novltime', K => {
     // عدد فصول العنصر إن وُجد حقل رقمي اسمه يحوي chapter (chaptersCount…)؛ null = غير معروف
     const chapN = it => { let v = null; const scan = o => Object.keys(o || {}).forEach(k => { if (v === null && /chapter/i.test(k) && typeof o[k] === 'number') v = o[k]; }); scan(it); if (v === null && it && typeof it.stats === 'object') scan(it.stats); return v; };
     let emptyHid = 0;
+    const seenPop = new Set(), popDone = { end: 0 }; // «الأكثر شعبية» ينتهي عند ~687 عملاً (hasMore=false)؛ نكمل بعدها من «الأحدث» دون تكرار
     async function apiPage(sort, page, perPage, extra) {
       let cur = page > 1 ? (apiCur[sort] || {})[page - 1] : '';
       if (page > 1 && !cur) {
@@ -126,7 +127,23 @@ NovelKit.add('novltime', K => {
       if (next) (apiCur[sort] = apiCur[sort] || {})[page] = next;
       // بلا مؤشر معروف: نُبقي الصفحة التالية ممكنة (تعود للطريقة القديمة) بدل إنهاء القائمة
       if (emptyHid && page === 1) log('روايات بلا فصول مخفية', { n: emptyHid });
-      return { items, hasNext: arr.length > 0 };
+      const hm = j && j.data && typeof j.data.hasMore === 'boolean' ? j.data.hasMore : undefined;
+      if (sort === 'popular') { items.forEach(it => seenPop.add(it.url)); if (hm === false || (!next && arr.length)) { if (!popDone.end) log('نهاية «الأكثر شعبية»', { page, seen: seenPop.size, total: j && j.data && j.data.total }); popDone.end = popDone.end || page; } }
+      return { items, hasNext: sort === 'popular' ? arr.length > 0 : (hm === undefined ? arr.length > 0 : hm) };
+    }
+    // صفحة قائمة واحدة؛ بعد نهاية «الشعبية» نكمل من «الأحدث» ونحذف ما سبق عرضه
+    let tailPtr = 1;
+    async function listPage(sort, page) {
+      if (sort === 'popular' && popDone.end && page > popDone.end) {
+        if (page === popDone.end + 1) tailPtr = 1;
+        for (let k = 0; k < 8; k++) {
+          const r = await apiPage('newest', tailPtr++, 20); if (!r) return null;
+          const it = r.items.filter(i => !seenPop.has(i.url));
+          if (it.length || !r.hasNext) return { items: it, hasNext: r.hasNext };
+        }
+        return { items: [], hasNext: false };
+      }
+      return apiPage(sort, page, 20);
     }
     async function apiWalk(sort, maxPages) {
       let n = 0, pg = 1; const key = '__walk' + sort; apiCur[key] = {};
@@ -215,7 +232,15 @@ NovelKit.add('novltime', K => {
       }
       const sort = a.listing === 'latest' ? 'latest' : 'popular', page = a.page || 1;
       try {
-        const ar = await apiPage(sort, page, 20);
+        let ar = await listPage(sort, page);
+        // صفحة كلها روايات بلا فصول (مخفية) تُرجع فارغة: نتخطّاها بدل إنهاء القائمة (كان يوقف «الأكثر شعبية» عند ~460)
+        let skipped = 0;
+        while (ar && !ar.items.length && ar.hasNext && skipped < 8) {
+          const np = page + skipped + 1, nx = await listPage(sort, np);
+          if (!nx) break; skipped++; ar = nx;
+          (apiCur[sort] = apiCur[sort] || {})[page] = (apiCur[sort] || {})[np] || (apiCur[sort] || {})[page];
+        }
+        if (skipped) log('صفحات فارغة تخطّيتها', { page, skipped, n: ar ? ar.items.length : 0 });
         if (ar && ar.items.length) { addIdx(ar.items); log('قائمة API ' + sort + ' ص' + page, { n: ar.items.length, next: ar.hasNext }); return { items: ar.items, hasNext: ar.hasNext }; }
       } catch (e) { log('قائمة API فشلت', { e: String(e && e.message || e).slice(0, 80) }); }
       const url = origin + '/ar/explore?sort=' + sort + '&language=ar' + (page > 1 ? '&page=' + page : '');

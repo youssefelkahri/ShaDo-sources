@@ -26,6 +26,24 @@
    "POST /wp-json/app/v2/reader/views — عدّاد مشاهدات فقط",
    "cmtapi.kolnovel.com/api/collections/entities/records — واجهة التعليقات (PocketBase)، لا علاقة لها بالفصول",
    "عمل بـ6703 فصلاً (هيمنة الإمبراطور): القائمة تُجلب بدفعات؛ المعرّف data-chapter-id هو نفسه رقم الفصل في الرابط"
-  ]
+  ],
+  "search_form": "نموذج البحث: GET / ?s=<q>&post_type=series (الحقل المخفي post_type=series يحصر النتائج في الأعمال)"
+ },
+ "novltime.com": {
+  "engine": "Next.js (app router) + REST /api/v1/search",
+  "list": "/api/v1/search?languages=ar&sort=popular|newest|oldest|relevance|rating&perPage=N&cursor=eyJ…  (الرد: data.items[], data.hasMore, data.nextCursor, data.total)",
+  "caps": "sort=popular ينتهي مبكراً (hasMore=false): 500 عنصراً عند perPage=20، 687 عند perPage=50 من 1273. sort=newest يعطي الكل (1273). الحل: عند hasMore=false في popular نكمل من newest ونحذف المكرر.",
+  "bad_sort": "latest => 400؛ البديل newest",
+  "item": "title, slug, genres, coverURL, stats{views,followers,avgRating,ratingCount,chapterCount}",
+  "empty_works": "chapterCount=0 أعمال فارغة (7 من 687 في popular): نخفيها",
+  "chapters": "الصفحة تعرض أول ~120 فصلاً مع العدد الكلي، ثم ملء الأرقام chapter-N",
+  "verified": "2026-11-13 بالطلب المباشر"
+ },
+ "riwayatarab.com": {
+  "engine": "Next.js app router (RSC: self.__next_f.push) — بلا واجهة JSON عامة ظاهرة",
+  "chapters": "/novel/<slug>/chapters?page=N (50 بالصفحة) + روابط /novel/<slug>/chapter/<n> أرقام متسلسلة",
+  "text": "النص في عناصر div داخل الصفحة وليس في p؛ الفصل الأخير يظهر «608 من 608» بلا رابط «التالي»",
+  "lesson": "اكتشاف API بالتخمين يرمي ~170 طلب 404 هنا؛ يجب الاستطلاع أولاً (سكربتات الصفحة/wp-json) والتوقف حين يكون الموقع RSC بلا أدلة",
+  "verified": "2026-11-13 بالطلب المباشر: الفصول 607–609 تُجلب 200 وبها نص عربي"
  }
 }
