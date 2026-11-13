@@ -20,6 +20,12 @@
   "chapter_url": "/shaag24<slug>z435ggye-<id>/ — المعرّف الرقمي في آخره",
   "blocked": "wp-json/wp/v2/* يرجع 403 من التطبيق (حجب)؛ app/v2 مفتوح",
   "speed": "350 فصلاً في ~3 ثوانٍ؛ 1317 فصلاً في ~17 ثانية",
-  "if_changes": "إن تغيّر app/v2 فالرجوع لـ chapter_page؛ وإن تغيّرا فالمتصفح الخفي مع التقاط الشبكة"
+  "if_changes": "إن تغيّر app/v2 فالرجوع لـ chapter_page؛ وإن تغيّرا فالمتصفح الخفي مع التقاط الشبكة",
+  "seen_in_devtools": [
+   "الموقع (2026-11-12): زر «عرض الجزء من الفصول» يجلب JSON {success,data:{html}} فيه عناصر li.kol-series-chapter (data-chapter-id, data-chapter-number) — شكل واجهة الفصول الجديدة",
+   "POST /wp-json/app/v2/reader/views — عدّاد مشاهدات فقط",
+   "cmtapi.kolnovel.com/api/collections/entities/records — واجهة التعليقات (PocketBase)، لا علاقة لها بالفصول",
+   "عمل بـ6703 فصلاً (هيمنة الإمبراطور): القائمة تُجلب بدفعات؛ المعرّف data-chapter-id هو نفسه رقم الفصل في الرابط"
+  ]
  }
 }
