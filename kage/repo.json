@@ -1,6 +1,6 @@
 {
   "name": "مصادر Kage Media",
-  "description": "مصادر Youssef الخاصة (MkAnime3rb · MkFasel · MkMovieBox) لتطبيق Kage Media",
+  "description": "مصادر Youssef الخاصة (MkAnime3rb · MkFasel · MkMovieBox · EgyWatch · 5TV · AlooyTV · LodyNet · YacinTV) لتطبيق Kage Media",
   "manifestVersion": 1,
   "pluginLists": [
     "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/plugins.json"

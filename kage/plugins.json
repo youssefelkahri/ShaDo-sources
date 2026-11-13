@@ -59,5 +59,111 @@
     ],
     "apiVersion": 1,
     "fileHash": "sha256-198051564283b0bab65307518d95207b1e4fe73b264802990d2648d723e71630"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/5TV.cs3",
+    "status": 1,
+    "version": 2,
+    "name": "5TV",
+    "internalName": "5TV",
+    "authors": [
+      "Abodabodd"
+    ],
+    "description": "",
+    "fileSize": 26624,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "TvSeries",
+      "Movie",
+      "AsianDrama"
+    ],
+    "iconUrl": "https://raw.githubusercontent.com/Abodabodd/re-3arabi/refs/heads/main/5TV/icon.png",
+    "apiVersion": 1,
+    "fileHash": "sha256-581ad6f054700bdbad0cf8b1eab1cf5106584c114ddf5394be87563fb152213d"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/Alooytv.cs3",
+    "status": 1,
+    "version": 2,
+    "name": "Alooytv",
+    "internalName": "Alooytv",
+    "authors": [
+      "Abodabodd"
+    ],
+    "description": "",
+    "fileSize": 15003,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "TvSeries",
+      "Movie"
+    ],
+    "iconUrl": "https://fitnur.com/uploads/avatars/c5ae8dadf88bcea9549657ec451a1563.jpg",
+    "apiVersion": 1,
+    "fileHash": "sha256-8dc3850bb169fad209b545cd6de5ef4a1c666db7ec0c45bea95ae26d373961b9"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/Egy.cs3",
+    "status": 1,
+    "version": 2,
+    "name": "EgyWatch",
+    "internalName": "Egy",
+    "authors": [
+      "Abodabodd"
+    ],
+    "description": "",
+    "fileSize": 51510,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "TvSeries",
+      "Movie"
+    ],
+    "iconUrl": "https://raw.githubusercontent.com/Abodabodd/re-3arabi/refs/heads/main/Egy/icon.png",
+    "apiVersion": 1,
+    "fileHash": "sha256-99393044291b6558d6058c070f31139424a6c146623fab5ddf9df237d2d7f6bf"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/Lodynet.cs3",
+    "status": 1,
+    "version": 3,
+    "name": "LodyNet",
+    "internalName": "Lodynet",
+    "authors": [
+      "Abodabodd"
+    ],
+    "description": "",
+    "fileSize": 44495,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "Movie"
+    ],
+    "iconUrl": "https://lodynet.watch/wp-content/themes/Lodynet2020/Img/Logo.webp",
+    "apiVersion": 1,
+    "fileHash": "sha256-79a853a9b5a84ead13bc7ee474d2acf58c734758c4ab0741d98300b6539fdf2e"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/Yacintv.cs3",
+    "status": 1,
+    "version": 4,
+    "name": "Yacintv",
+    "internalName": "Yacintv",
+    "authors": [
+      "Abodabodd"
+    ],
+    "description": "",
+    "fileSize": 32134,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "TvSeries",
+      "Live",
+      "Movie"
+    ],
+    "iconUrl": "https://yt3.googleusercontent.com/ulm35tweg3do5istps0TgCjMmJSVczGUL2NIrXMwI1DDRi5ty29BIzQSUHVgqZN5CSo1PHhiA6M=s900-c-k-c0x00ffffff-no-rj",
+    "apiVersion": 1,
+    "fileHash": "sha256-bcc4906d2ffa43251e5aa057d32b9d1d98675f21797d4afe91381c23f31c26bc"
   }
 ]
