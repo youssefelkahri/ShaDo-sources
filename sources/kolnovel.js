@@ -74,7 +74,7 @@ NovelKit.add('kolnovel', K => {
           else rest.push(t);
         });
         rest = rest.map(t => t.replace(/\s*المشاهدات?\s*[\d,٬.]*.*$/, '').replace(/\s*\d{1,2}\/\d{1,2}\/\d{4}\s*$/, '').trim()).filter(t => t && t !== 'الفصول');
-        const title = rest[0] || '', arc = rest[1] || '';
+        const title = rest[0] || '', arc = /^[\d٠-٩٬,.\s]+$/.test(rest[1] || '') ? '' : (rest[1] || ''); // رقم مجرّد = عدّاد مشاهدات لا اسم مجلد
         const sp = num == null || odd;
         if (sp) num = null;
         items.push({ url: href.split('#')[0], title: (sp ? ((!title || /^(فصل\s*)?[-—–\s]*$|^INFO\d*$/i.test(title)) && arc ? arc : (title || X.t(a))) : ((num != null ? 'فصل ' + num : '') + (title ? ' - ' + title : ''))).slice(0, 150), num, date, arc, sp: sp ? 1 : 0, o: (n || 1) * 1000 + items.length });
