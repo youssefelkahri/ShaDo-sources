@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-11-13T15:34:25.425Z",
+  "sites": {
+    "faselhd": {
+      "ok": true,
+      "best": "fasel-hd.co",
+      "domains": [
+        {
+          "domain": "fasel-hd.co",
+          "status": 200,
+          "finalHost": "fasel-hd.co",
+          "ok": true,
+          "challenge": false
+        },
+        {
+          "domain": "fasel-hd.cam",
+          "status": 200,
+          "finalHost": "fasel-hd.co",
+          "ok": true,
+          "challenge": false
+        },
+        {
+          "domain": "faselhd.cam",
+          "status": 200,
+          "finalHost": "alliance4creativity.com",
+          "ok": false,
+          "challenge": false,
+          "note": "redirects elsewhere"
+        },
+        {
+          "domain": "faselhd.center",
+          "status": 200,
+          "finalHost": "fasel-hd.co",
+          "ok": true,
+          "challenge": false
+        }
+      ]
+    },
+    "akwam": {
+      "ok": true,
+      "best": "akwam.it",
+      "domains": [
+        {
+          "domain": "akwam.it",
+          "status": 200,
+          "finalHost": "akwam.it",
+          "ok": true,
+          "challenge": false
+        },
+        {
+          "domain": "akwam.com.co",
+          "status": 200,
+          "finalHost": "akwam.it",
+          "ok": true,
+          "challenge": false
+        },
+        {
+          "domain": "akw.cam",
+          "status": 200,
+          "finalHost": "akw.cam",
+          "ok": false,
+          "challenge": false,
+          "note": "redirects elsewhere"
+        }
+      ]
+    }
+  }
+}
