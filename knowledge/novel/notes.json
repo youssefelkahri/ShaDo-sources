@@ -45,5 +45,16 @@
   "text": "النص في عناصر div داخل الصفحة وليس في p؛ الفصل الأخير يظهر «608 من 608» بلا رابط «التالي»",
   "lesson": "اكتشاف API بالتخمين يرمي ~170 طلب 404 هنا؛ يجب الاستطلاع أولاً (سكربتات الصفحة/wp-json) والتوقف حين يكون الموقع RSC بلا أدلة",
   "verified": "2026-11-13 بالطلب المباشر: الفصول 607–609 تُجلب 200 وبها نص عربي"
+ },
+ "cenele.com": {
+  "engine": "Madara child theme (madara-child-novel)، نوع المحتوى cont: /cont/<slug>/ و/cont/<slug>/[<volume_slug>/]<chapter_slug>/",
+  "api": "wp-json/nhv/v1 عام: /library?page&per_page(≤60)&orderby=latest|views|rating&search=  ·  /novels/<id>  ·  /novels/<id>/chapters?order=asc&per_page=300&page=N  ·  /home  ·  /app/sources. وفهرس wp-json/ يُظهر cenele-app/v1 أيضاً (chapters/manifest يحتاج version)",
+  "id_of_work": "<link rel='shortlink' href='?p=ID'> في صفحة العمل",
+  "locked": "/chapters/<id> يحتاج ترويسات توقيع (chapter_signature_required) فلا يصلح؛ النص من صفحة الفصل div.reading-content",
+  "poison": "وسوم blockquote[inert][data-nosnippet] بحروف مزخرفة «يسرق من موقع…» + إعلان nhv-reader-promo + فقرات «اذكر الله» و«…» تُزال",
+  "size": "258 عملاً (library.total)، أول رد في 0.2 ثانية، 609 فصلاً في 3 طلبات",
+  "reader_type": "library.items[].reader.type == text للروايات؛ غيره (webtoon) نخفيه",
+  "found_by": "استطلاع wp-json (namespaces → routes) — بلا تخمين",
+  "verified": "2026-11-13 بالطلب المباشر"
  }
 }

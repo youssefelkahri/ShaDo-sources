@@ -203,6 +203,37 @@
         ],
         "filters": []
       }
+    },
+    {
+      "id": "cenele",
+      "name": "سينيل",
+      "version": 1,
+      "file": "sources/cenele.js",
+      "sha256": "a85ec7f0cda4696395652ffed548b8bb902db82c905df5ecb4fd48bd4551249a",
+      "minNative": 0,
+      "data": {
+        "id": "cenele",
+        "name": "سينيل",
+        "home": "https://cenele.com",
+        "tpl": "madara",
+        "engine": "cenele",
+        "base": "cont",
+        "listings": [
+          [
+            "latest",
+            "الأحدث"
+          ],
+          [
+            "popular",
+            "الأكثر مشاهدة"
+          ],
+          [
+            "rating",
+            "الأعلى تقييماً"
+          ]
+        ],
+        "filters": []
+      }
     }
   ],
   "kits": [
