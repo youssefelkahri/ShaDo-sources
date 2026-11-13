@@ -106,12 +106,6 @@ NovelKit.add('kolnovel', K => {
           if (a.page > 1) return { items: [], hasNext: false };
           let items = [], via = '';
           const stat = {};
-          try {
-            const r = await X.postForm(H + '/wp-admin/admin-ajax.php', 'action=ts_ac_do_search&ts_ac_query=' + encodeURIComponent(a.q.trim()).replace(/%20/g, '+'));
-            const j = JSON.parse(r.text);
-            items = ((j.series && j.series[0] && j.series[0].all) || []).map(e => ({ url: e.post_link, title: clean(e.post_title), cover: e.post_image || '', latest: '' })).filter(x => x.url && x.title);
-            if (items.length) via = 'ajax';
-          } catch (e) { stat.ajax = String(e && e.message || e).slice(0, 80); }
           if (!items.length) { try { items = cards(await X.html(H + '/?s=' + encodeURIComponent(a.q))); if (items.length) via = 's='; } catch (e) { stat.s = String(e && e.message || e).slice(0, 80); } }
           if (!items.length) {
             try {
@@ -119,6 +113,14 @@ NovelKit.add('kolnovel', K => {
               items = ((j && j.data) || []).map(t => ({ url: t.url, title: clean(t.title), cover: t.cover_url || '', latest: '' })).filter(x => x.url && x.title);
               if (items.length) via = 'app/v2'; else stat.v2 = 'فارغ:' + JSON.stringify(j || {}).slice(0, 160);
             } catch (e) { stat.v2 = String(e && e.message || e).slice(0, 80); }
+          }
+          if (!items.length) {
+          try {
+            const r = await X.postForm(H + '/wp-admin/admin-ajax.php', 'action=ts_ac_do_search&ts_ac_query=' + encodeURIComponent(a.q.trim()).replace(/%20/g, '+'));
+            const j = JSON.parse(r.text);
+            items = ((j.series && j.series[0] && j.series[0].all) || []).map(e => ({ url: e.post_link, title: clean(e.post_title), cover: e.post_image || '', latest: '' })).filter(x => x.url && x.title);
+            if (items.length) via = 'ajax';
+          } catch (e) { stat.ajax = String(e && e.message || e).slice(0, 80); }
           }
           if (!items.length) { items = await X.siteSearch(S, a.q).catch(() => []); if (items.length) via = 'siteSearch'; }
           logKol('بحث', { q: a.q, n: items.length, via: via || '-', fail: JSON.stringify(stat) });
@@ -143,15 +145,16 @@ NovelKit.add('kolnovel', K => {
         // الفصل الأول الحقيقي: أول عنصر مرقّم (زر «الفصل الأول» في الموقع قد يشير إلى صفحة INFO)
         const first = (pg.items.find(c => !c.sp) || {}).url || (() => { const a = X.byText(d, 'a[href]', ['الفصل الأول']).map(x => X.abs(x.getAttribute('href'), url)).find(h => h && isChUrl(h, new URL(url).origin)); return a ? a.split('#')[0] : ''; })();
         const total = pg.total, firstItems = pg.items;
-        // فحص صامت لواجهة app/v2 (لا يؤثر على الجلب): يسجّل شكل البيانات لنعرف هل تحمل رابط الفصل
-        (async () => {
+        // واجهة app/v2 (100 فصل بالطلب): نجلب أول دفعة هنا، ويستعملها more() إن طابقت صفحة الفصول الأولى
+        let tid = ''; try { tid = (sel1(d, '[data-kol-series-id]') || { getAttribute: () => '' }).getAttribute('data-kol-series-id') || ((sel1(d, 'article[id^="post-"]') || { id: '' }).id || '').replace('post-', ''); } catch (e) { }
+        const apiList = cur => X.json(H + '/wp-json/app/v2/titles/' + tid + '/reading-list' + (cur ? '?cursor=' + cur : ''));
+        const apiFirst = !tid ? Promise.resolve(null) : (async () => {
           try {
-            const tid = (sel1(d, '[data-kol-series-id]') || { getAttribute: () => '' }).getAttribute('data-kol-series-id') || ((sel1(d, 'article[id^="post-"]') || { id: '' }).id || '').replace('post-', '');
-            if (!tid) return logKol('app/v2: لا معرّف عمل', {});
-            const t0 = Date.now(), j = await X.json(H + '/wp-json/app/v2/titles/' + tid + '/reading-list');
+            const t0 = Date.now(), j = await apiList('');
             const it = (j && j.data && j.data[0]) || {};
             logKol('app/v2 reading-list', { ms: Date.now() - t0, n: ((j && j.data) || []).length, total: j && j.meta && j.meta.total, keys: Object.keys(it).join(','), sample: JSON.stringify(it).slice(0, 300), page1: (firstItems[0] || {}).url });
-          } catch (e) { logKol('app/v2 فشل', { e: String(e && e.message || e).slice(0, 80) }); }
+            return j;
+          } catch (e) { logKol('app/v2 فشل', { e: String(e && e.message || e).slice(0, 80) }); return null; }
         })();
         let cancelled = false;
         logKol('فصول ' + baseOf(url).split('/').filter(Boolean).pop(), { page1: firstItems.length, total, next: pg.hasNext, start: first, sample: JSON.stringify(firstItems.slice(0, 4).map(c => [c.title, c.num, c.sp, c.arc])).slice(0, 400) });
@@ -181,6 +184,37 @@ NovelKit.add('kolnovel', K => {
             const fresh = pp.items.filter(c => !have.has(c.url)); fresh.forEach(c => { have.add(c.url); if (c.arc) arcs[c.arc] = (arcs[c.arc] || 0) + 1; });
             got = have.size; return fresh;
           };
+          // الطريقة السريعة: reading-list بدفعات 100 بالتوازي (cursor = موضع العنصر). تُعتمد فقط إن طابقت معرّفات الصفحة الأولى؛ وإلا نرجع لصفحات HTML.
+          const viaApi = async () => {
+            const j1 = await apiFirst; if (!j1 || !Array.isArray(j1.data) || !j1.data.length) return null;
+            const total0 = Number(j1.meta && j1.meta.total), step = j1.data.length, ps = firstItems.length;
+            const pm = ((firstItems[0] || {}).url || '').match(/^(.*-)(\d+)\/?$/);
+            if (!pm || !(total0 > 0) || ps < 2) return null;
+            for (let i = 0; i < ps; i++) { const m = (firstItems[i].url || '').match(/-(\d+)\/?$/); if (!m || !j1.data[i] || String(j1.data[i].id) !== m[1]) return null; }
+            const mk = (c, p) => {
+              const ns = AR(String(c.number == null ? '' : c.number).trim()), sp = !/^\d+(\.\d+)?$/.test(ns), num = sp ? null : parseFloat(ns);
+              const tt = clean(c.title || ''), pa = String(c.published_at || '');
+              return { url: pm[1] + c.id + '/', title: (sp ? (tt || ('فصل ' + ns)) : ('فصل ' + num + (tt ? ' - ' + tt : ''))).slice(0, 150), num, date: pa.length >= 10 ? pa.slice(8, 10) + '/' + pa.slice(5, 7) + '/' + pa.slice(0, 4) : '', arc: clean(c.volume || ''), sp: sp ? 1 : 0, o: (Math.floor(p / ps) + 1) * 1000 + (p % ps) };
+            };
+            const t0 = Date.now(), emit = (arr, base) => { const fresh = arr.map((c, i) => mk(c, base + i)).filter(c => !have.has(c.url)); fresh.forEach(c => { have.add(c.url); if (c.arc) arcs[c.arc] = (arcs[c.arc] || 0) + 1; }); got = have.size; return fresh; };
+            const pgOf = p => Math.floor(p / ps) + 1;
+            let fr = emit(j1.data, 0); if (o.onBatch && fr.length) { try { o.onBatch(fr, { got, total: total0, page: pgOf(step - 1), contig: pgOf(step - 1) }); } catch (e) { } }
+            const offs = []; for (let c = step; c < total0; c += step) offs.push(c);
+            for (let i = 0; i < offs.length; i += 4) {
+              if (cancelled) return { got, total: total0, failed: [], cancelled: true, contig: 1, reason: 'cancelled' };
+              const grp = offs.slice(i, i + 4);
+              const rs = await Promise.all(grp.map(async c => { for (let t = 0; t < 3; t++) { try { const jj = await apiList(c); if (jj && Array.isArray(jj.data)) return jj.data; } catch (e) { } await sleep(500 * (t + 1)); } return null; }));
+              for (let k = 0; k < rs.length; k++) {
+                if (!rs[k]) throw new Error('reading-list cursor ' + grp[k]);
+                fr = emit(rs[k], grp[k]); const last = grp[k] + rs[k].length - 1;
+                if (o.onBatch && fr.length) { try { o.onBatch(fr, { got, total: total0, page: pgOf(last), contig: pgOf(last) }); } catch (e) { } }
+              }
+            }
+            const contig = pgOf(Math.max(0, total0 - 1));
+            logKol('انتهى جلب الفصول', { reason: 'api', got, total: total0, failed: '', sec: Math.round((Date.now() - t0) / 1000), arcs: JSON.stringify(arcs).slice(0, 300), match: got === total0 });
+            return { got, total: total0, failed: [], cancelled: false, contig, reason: 'api' };
+          };
+          try { const ra = await viaApi(); if (ra) return ra; } catch (e) { logKol('app/v2 جلب فشل — صفحات HTML', { e: String(e && e.message || e).slice(0, 80) }); }
           const pre = new Map();
           let n = Math.max(2, o.start || 2), fails = 0, stale = 0, contig = n - 1, hasNext = true;
           const t0 = Date.now(); let reason = 'done';
