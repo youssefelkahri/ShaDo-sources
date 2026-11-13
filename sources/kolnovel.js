@@ -100,31 +100,44 @@ NovelKit.add('kolnovel', K => {
       const first = imgs.find(ok); return first ? first.u : '';
     }
     const logKol = (m, o) => { try { global.NovelLog && global.NovelLog.add('kol', m, o); } catch (e) { } };
+    const searchQ = {};
     return Object.assign(base, {
       async list(a) {
         if (a.q) {
-          if (a.page > 1) return { items: [], hasNext: false };
-          let items = [], via = '';
+          const q0 = a.q.trim(), pg = a.page || 1;
+          // بحث ووردبريس لا يوحّد الهمزات: «اشورا» ≠ «أشورا». نجرّب الأصل ثم صيغًا بديلة ونتذكّر الصيغة الناجحة للصفحات التالية
+          const variants = [q0];
+          const addV = v => { if (v && variants.indexOf(v) < 0) variants.push(v); };
+          addV(q0.replace(/(^|\s)ا/g, '$1أ')); addV(q0.replace(/(^|\s)ا/g, '$1إ')); addV(q0.replace(/(^|\s)ا/g, '$1آ')); addV(q0.replace(/ه(?=\s|$)/g, 'ة')); addV(q0.replace(/ى/g, 'ي'));
+          if (pg > 1) {
+            const v = searchQ[q0]; if (!v) return { items: [], hasNext: false };
+            try { const its = cards(await X.html(H + '/page/' + pg + '/?s=' + encodeURIComponent(v))); return { items: its, hasNext: its.length >= 20 }; } catch (e) { return { items: [], hasNext: false }; }
+          }
+          let items = [], via = '', clean200 = false;
           const stat = {};
-          if (!items.length) { try { items = cards(await X.html(H + '/?s=' + encodeURIComponent(a.q))); if (items.length) via = 's='; } catch (e) { stat.s = String(e && e.message || e).slice(0, 80); } }
+          for (let i = 0; i < variants.length && !items.length && i < 4; i++) {
+            try { items = cards(await X.html(H + '/?s=' + encodeURIComponent(variants[i]))); clean200 = true; if (items.length) { via = i ? 's=~' + i : 's='; searchQ[q0] = variants[i]; } }
+            catch (e) { stat.s = String(e && e.message || e).slice(0, 80); break; }
+          }
           if (!items.length) {
             try {
-              const j = await X.json(H + '/wp-json/app/v2/discover?q=' + encodeURIComponent(a.q.trim()));
+              const j = await X.json(H + '/wp-json/app/v2/discover?q=' + encodeURIComponent(q0));
               items = ((j && j.data) || []).map(t => ({ url: t.url, title: clean(t.title), cover: t.cover_url || '', latest: '' })).filter(x => x.url && x.title);
-              if (items.length) via = 'app/v2'; else stat.v2 = 'فارغ:' + JSON.stringify(j || {}).slice(0, 160);
+              if (items.length) via = 'app/v2'; else stat.v2 = 'فارغ';
             } catch (e) { stat.v2 = String(e && e.message || e).slice(0, 80); }
           }
-          if (!items.length) {
-          try {
-            const r = await X.postForm(H + '/wp-admin/admin-ajax.php', 'action=ts_ac_do_search&ts_ac_query=' + encodeURIComponent(a.q.trim()).replace(/%20/g, '+'));
-            const j = JSON.parse(r.text);
-            items = ((j.series && j.series[0] && j.series[0].all) || []).map(e => ({ url: e.post_link, title: clean(e.post_title), cover: e.post_image || '', latest: '' })).filter(x => x.url && x.title);
-            if (items.length) via = 'ajax';
-          } catch (e) { stat.ajax = String(e && e.message || e).slice(0, 80); }
+          // الصفحة سليمة ولا نتائج = لا نتائج فعلًا: لا نُغرق الموقع بتخمينات؛ التخمين فقط إن فشل البحث نفسه
+          if (!items.length && !clean200) {
+            try {
+              const r = await X.postForm(H + '/wp-admin/admin-ajax.php', 'action=ts_ac_do_search&ts_ac_query=' + encodeURIComponent(q0).replace(/%20/g, '+'));
+              const j = JSON.parse(r.text);
+              items = ((j.series && j.series[0] && j.series[0].all) || []).map(e => ({ url: e.post_link, title: clean(e.post_title), cover: e.post_image || '', latest: '' })).filter(x => x.url && x.title);
+              if (items.length) via = 'ajax';
+            } catch (e) { stat.ajax = String(e && e.message || e).slice(0, 80); }
+            if (!items.length) { items = await X.siteSearch(S, q0).catch(() => []); if (items.length) via = 'siteSearch'; }
           }
-          if (!items.length) { items = await X.siteSearch(S, a.q).catch(() => []); if (items.length) via = 'siteSearch'; }
-          logKol('بحث', { q: a.q, n: items.length, via: via || '-', fail: JSON.stringify(stat) });
-          return { items, hasNext: false };
+          logKol('بحث', { q: q0, n: items.length, via: via || '-', fail: JSON.stringify(stat) });
+          return { items, hasNext: via.indexOf('s=') === 0 && items.length >= 20 };
         }
         const f = Object.assign({}, a.f || {});
         if (!f.order) f.order = a.listing === 'popular' ? 'popular' : 'update';
