@@ -28,7 +28,7 @@ import java.io.File
 private val classes = mapOf(
     "5TV" to "com.tv.FiveTVProvider",
     "Egy" to "com.egy.EgyWatchProvider",
-    "Lodynet" to "com.lody.LodyNet",
+    "Lodynet" to "com.lagradost.cloudstream3.plugins.LodyNet",
     "Alooytv" to "com.alooy.AlooyTvProvider",
 )
 
