@@ -87,9 +87,16 @@ class KageSite : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
-        val doc = app.get(data).document
+        val pages = buildList {
+            Recipe.watchSuffix?.takeIf { it.isNotBlank() }?.let { add(data.trimEnd('/') + "/" + it.trim('/') + "/") }
+            add(data)
+        }
         var any = false
-        servers(doc).forEach { src -> if (runCatching { loadExtractor(src, data, subtitleCallback, callback) }.getOrDefault(false)) any = true }
+        for (page in pages) {
+            val list = runCatching { servers(app.get(page).document) }.getOrDefault(emptyList())
+            list.forEach { src -> if (runCatching { loadExtractor(src, page, subtitleCallback, callback) }.getOrDefault(false)) any = true }
+            if (any) break
+        }
         return any
     }
 }

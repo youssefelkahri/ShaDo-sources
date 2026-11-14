@@ -32,6 +32,7 @@ val bakeRecipe = tasks.register("bakeRecipe") {
             "    val searchPath: String get() = o.optString(\"searchPath\", \"/?s=\")\n" +
             "    val episodeHref: String? get() = o.optString(\"episodeHref\").takeIf { it.isNotBlank() }\n" +
             "    val episodeBox: String? get() = o.optString(\"episodeBox\").takeIf { it.isNotBlank() }\n" +
+            "    val watchSuffix: String? get() = o.optString(\"watchSuffix\").takeIf { it.isNotBlank() }\n" +
             "    val serverSelector: String? get() = o.optString(\"serverSelector\").takeIf { it.isNotBlank() }\n" +
             "    val serverAttr: String get() = o.optString(\"serverAttr\", \"src\")\n" +
             "}\n"
