@@ -1,0 +1,21 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/my-sources/ExampleWP.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "ExampleWP",
+    "internalName": "ExampleWP",
+    "authors": [
+      "Youssef"
+    ],
+    "description": "مصدر من موقعه (Kage)",
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "TvSeries",
+      "Movie",
+      "Anime"
+    ],
+    "apiVersion": 1
+  }
+]
