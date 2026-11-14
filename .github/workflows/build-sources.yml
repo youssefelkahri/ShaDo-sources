@@ -1,0 +1,51 @@
+name: Build my sources (.cs3)
+
+# يبني من كل وصفة في my-sources/*.json مصدر .cs3 قابلاً للتثبيت، ويُحدّث plugins.json.
+on:
+  push:
+    paths: [ 'my-sources/*.json', 'tools/cs3-builder/**' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-sources
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - name: Build each recipe
+        working-directory: tools/cs3-builder
+        run: |
+          chmod +x gradlew
+          for recipe in "$GITHUB_WORKSPACE"/my-sources/*.json; do
+            name=$(python3 -c "import json;print(json.load(open('$recipe')).get('name','KageSite'))")
+            slug=$(echo "$name" | tr -cd '[:alnum:]')
+            echo "building $name"
+            if ./gradlew :KageSite:make --no-daemon -q -Precipe="$recipe"; then
+              cp KageSite/build/KageSite.cs3 "$GITHUB_WORKSPACE/my-sources/${slug}.cs3"
+              python3 rename.py "$GITHUB_WORKSPACE/my-sources/${slug}.cs3" "$name"
+            else
+              echo "failed: $name"
+            fi
+          done
+          python3 manifest.py
+      - name: Commit
+        run: |
+          git config user.name "kage-bot"
+          git config user.email "kage-bot@users.noreply.github.com"
+          git add my-sources
+          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          git commit -q -m "build my sources"
+          git pull --rebase -q
+          git push
