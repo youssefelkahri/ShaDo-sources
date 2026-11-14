@@ -1,0 +1,51 @@
+name: Kage shared index
+
+# كل يوم (02:41) + يدوياً: يفتح كل أعمال المصادر (بكود إضافات عبود) ويحفظ صفحاتها في index/ ليفتحها Kage فوراً.
+# فاصل لا يُفهرس هنا (Cloudflare): يفهرسه هاتف يوسف بوضع المُفهرِس.
+on:
+  schedule:
+    - cron: '41 2 * * *'
+  workflow_dispatch:
+    inputs:
+      sites:
+        description: 'المصادر (مفصولة بفاصلة)'
+        default: '5TV,Egy,Lodynet,Alooytv'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kage-index
+  cancel-in-progress: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Abodabodd/re-3arabi
+          path: re-3arabi
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build the indexer
+        working-directory: tools/kage-indexer
+        run: chmod +x gradlew && ./gradlew installDist --no-daemon -q -Psites="${{ github.event.inputs.sites || '5TV,Egy,Lodynet,Alooytv' }}" -PsourceRoot="$GITHUB_WORKSPACE/re-3arabi"
+      - name: Index
+        env:
+          KAGE_MINUTES: 300
+        run: tools/kage-indexer/build/install/kage-indexer/bin/kage-indexer . "${{ github.event.inputs.sites || '5TV,Egy,Lodynet,Alooytv' }}" | grep -v '^[DIV]/'
+      - name: Commit the index
+        run: |
+          rm -rf re-3arabi
+          git config user.name "kage-bot"
+          git config user.email "kage-bot@users.noreply.github.com"
+          git add index
+          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          git commit -q -m "kage index: daily update"
+          git pull --rebase -q
+          git push
