@@ -1,20 +1,7 @@
 {
-  "v": 10,
+  "v": 11,
   "homes": {},
-  "sources": [
-    {
-      "id": "mangadar",
-      "name": "MangaDar",
-      "home": "https://mangadar.com",
-      "plugin": "mangadar.js",
-      "listings": [
-        [
-          "latest",
-          "الأحدث"
-        ]
-      ]
-    }
-  ],
+  "sources": [],
   "off": [
     "asgardscans",
     "dilar",
