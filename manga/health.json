@@ -1,0 +1,318 @@
+{
+  "sources": {
+    "anyonemanga": {
+      "name": "Anyone Manga",
+      "status": "broken",
+      "note": "تفاصيل العمل: HTTP 403",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "areamanga": {
+      "name": "أريا مانجا",
+      "status": "cloudflare",
+      "note": "HTTP 403",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "ariatoon": {
+      "name": "AriaToon",
+      "status": "ok",
+      "note": "20 عمل · 8 فصل · 10 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "asgardscans": {
+      "name": "AsgardScans",
+      "status": "down",
+      "note": "HTTP 522",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "azora": {
+      "name": "Azora",
+      "status": "ok",
+      "note": "18 عمل · 7 فصل · 20 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "comicverse": {
+      "name": "Comic Verse",
+      "status": "broken",
+      "note": "تفاصيل العمل: HTTP 429",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "despairmanga": {
+      "name": "Despair Manga",
+      "status": "ok",
+      "note": "24 عمل · 213 فصل · 26 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "detectiveconanar": {
+      "name": "شبكة كونان العربية",
+      "status": "cloudflare",
+      "note": "HTTP 403",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "dilar": {
+      "name": "Dilar",
+      "status": "cloudflare",
+      "note": "HTTP 403",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "eshadow": {
+      "name": "EShadow",
+      "status": "broken",
+      "note": "تفاصيل العمل: لا فصول",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "hijala": {
+      "name": "Hijala",
+      "status": "cloudflare",
+      "note": "HTTP 403",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "kawaiimanga": {
+      "name": "Kawii Manga",
+      "status": "ok",
+      "note": "20 عمل · 36 فصل · 38 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "lavascans": {
+      "name": "Lava Scans",
+      "status": "ok",
+      "note": "32 عمل · 59 فصل · 16 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "lonertranslations": {
+      "name": "Loner Translations",
+      "status": "broken",
+      "note": "تفاصيل العمل: HTTP 429",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "manga3asq": {
+      "name": "3asq",
+      "status": "ok",
+      "note": "21 عمل · 27 فصل · 71 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "mangaailand": {
+      "name": "Manga Ai Land",
+      "status": "broken",
+      "note": "تفاصيل العمل: HTTP 429",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "mangadar": {
+      "name": "MangaDar",
+      "status": "cloudflare",
+      "note": "HTTP 403",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "mangalek": {
+      "name": "مانجا ليك",
+      "status": "broken",
+      "note": "قائمة فارغة",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "mangalink": {
+      "name": "مانجا لينك",
+      "status": "broken",
+      "note": "قائمة فارغة",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "mangalionz": {
+      "name": "MangaLionz",
+      "status": "broken",
+      "note": "قائمة فارغة",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "mangaspark": {
+      "name": "MangaSpark",
+      "status": "broken",
+      "note": "قائمة فارغة",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "mangastarz": {
+      "name": "Manga Starz",
+      "status": "broken",
+      "note": "قائمة فارغة",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "mangaswat": {
+      "name": "MangaSwat",
+      "status": "ok",
+      "note": "20 عمل · 191 فصل · 24 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "mangatales": {
+      "name": "Manga Tales",
+      "status": "ok",
+      "note": "27 عمل · 6 فصل · 11 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "mangatik": {
+      "name": "MangaTik",
+      "status": "ok",
+      "note": "24 عمل · 115 فصل · 15 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "mangatime": {
+      "name": "MangaTime",
+      "status": "ok",
+      "note": "24 عمل · 377 فصل · 42 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "mangatuk": {
+      "name": "MangaTuk",
+      "status": "ok",
+      "note": "30 عمل · 109 فصل · 11 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "manhatok": {
+      "name": "Manhatok",
+      "status": "ok",
+      "note": "11 عمل · 7 فصل · 19 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "murim": {
+      "name": "Murim",
+      "status": "broken",
+      "note": "صفحات الفصل: فارغة",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "oduto": {
+      "name": "Oduto",
+      "status": "ok",
+      "note": "1 عمل · 25 فصل · 58 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "orcamanga": {
+      "name": "Orca Manga",
+      "status": "ok",
+      "note": "20 عمل · 1 فصل · 5 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "procomic": {
+      "name": "ProComic",
+      "status": "cloudflare",
+      "note": "HTTP 403",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "rocksmanga": {
+      "name": "Rocks Manga",
+      "status": "ok",
+      "note": "24 عمل · 201 فصل · 73 صفحة",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 1794717951446
+    },
+    "stellarsaber": {
+      "name": "StellarSaber",
+      "status": "cloudflare",
+      "note": "HTTP 403",
+      "fails": 0,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "teamx": {
+      "name": "Team X",
+      "status": "broken",
+      "note": "قائمة فارغة",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "xsanomanga": {
+      "name": "XSano Manga",
+      "status": "broken",
+      "note": "صفحات الفصل: فارغة",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    },
+    "yokai": {
+      "name": "Yokai",
+      "status": "broken",
+      "note": "تفاصيل العمل: HTTP 429",
+      "fails": 1,
+      "checkedAt": 1794717951446,
+      "lastOk": 0
+    }
+  },
+  "autoOff": [],
+  "at": 1794717951446,
+  "report": [
+    "⚠ Anyone Manga: يحتاج إصلاحاً يدوياً (تفاصيل العمل: HTTP 403)",
+    "⚠ Comic Verse: يحتاج إصلاحاً يدوياً (تفاصيل العمل: HTTP 429)",
+    "⚠ EShadow: يحتاج إصلاحاً يدوياً (تفاصيل العمل: لا فصول)",
+    "⚠ Loner Translations: يحتاج إصلاحاً يدوياً (تفاصيل العمل: HTTP 429)",
+    "⚠ Manga Ai Land: يحتاج إصلاحاً يدوياً (تفاصيل العمل: HTTP 429)",
+    "⚠ مانجا ليك: يحتاج إصلاحاً يدوياً (قائمة فارغة)",
+    "⚠ مانجا لينك: يحتاج إصلاحاً يدوياً (قائمة فارغة)",
+    "⚠ MangaLionz: يحتاج إصلاحاً يدوياً (قائمة فارغة)",
+    "⚠ MangaSpark: يحتاج إصلاحاً يدوياً (قائمة فارغة)",
+    "⚠ Manga Starz: يحتاج إصلاحاً يدوياً (قائمة فارغة)",
+    "⚠ Murim: يحتاج إصلاحاً يدوياً (صفحات الفصل: فارغة)",
+    "⚠ Team X: يحتاج إصلاحاً يدوياً (قائمة فارغة)",
+    "⚠ XSano Manga: يحتاج إصلاحاً يدوياً (صفحات الفصل: فارغة)",
+    "⚠ Yokai: يحتاج إصلاحاً يدوياً (تفاصيل العمل: HTTP 429)"
+  ]
+}
