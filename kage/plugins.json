@@ -2,14 +2,14 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAnime3rb.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "MkAnime3rb",
     "internalName": "MkAnime3rb",
     "authors": [
       "Youssef"
     ],
     "description": "Anime3rb (مصدر مكتبتي الخاص)",
-    "fileSize": 29440,
+    "fileSize": 30779,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -18,7 +18,7 @@
       "OVA"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-b9ae5a0aa210d07f3e5fb6955e0a61903f7c3f32694e0d608aeed3fdae110bce"
+    "fileHash": "sha256-fa25ef39c8aa04663fadad83510ae75614a4714088081e72bc5aa6996d81528f"
   },
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkFasel.cs3",
