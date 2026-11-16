@@ -379,13 +379,17 @@
  },
  {
   "id": "Wecima",
-  "host": "https://wecima.ac",
+  "host": "https://wecima.lifestyle",
   "traits": [
    "cloudflare",
    "base64"
   ],
   "extractors": [],
-  "ref": "Abodabodd/re-3arabi"
+  "ref": "Abodabodd/re-3arabi",
+  "prev": [
+   "https://wecima.ac"
+  ],
+  "seen": "2026-11-16"
  },
  {
   "id": "Witanime",

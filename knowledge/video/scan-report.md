@@ -1,3 +1,39 @@
+# تقرير فحص الإضافات — 2026-11-16
+
+المستودعات المفحوصة: 7
+
+### مواقع انتقلت لنطاق جديد (طُبّقت تلقائياً في نواة الفيديو) (1)
+- We Cima: https://wecima.ac ← https://wecima.lifestyle (Abodabodd/re-3arabi)
+### مواقع عربية جديدة لها إضافة (0)
+- لا شيء
+### مستخرجات فيديو جديدة (للمراجعة) (24)
+- ArabicVidstackExtractor — upns.one (Abodabodd/re-3arabi)
+- TukTukVipExtractor — lolololu.website (Abodabodd/re-3arabi)
+- ArabicMegaMaxExtractor — megamax.me (Abodabodd/re-3arabi)
+- ArabicByseExtractor — byseqekaho.com (Abodabodd/re-3arabi)
+- ArabicFireStreamExtractor — firestream.to (Abodabodd/re-3arabi)
+- ArabicVidaraExtractor — vidaraa.cc (Abodabodd/re-3arabi)
+- ArabicYonaPlayExtractor — mid.yonaplay.net (Abodabodd/re-3arabi)
+- DotPlayExtractor — dotplay.net (Abodabodd/re-3arabi)
+- ArabicStreamWishExtractor — streamwish.fun (Abodabodd/re-3arabi)
+- ArabicPackerExtractor — lulustream.com (Abodabodd/re-3arabi)
+- LuluStreamExtractor — luluvdo.com (Abodabodd/re-3arabi)
+- ArabicDoodExtractor — dsvplay.com (Abodabodd/re-3arabi)
+- ArabicVoeExtractor — voe.sx (Abodabodd/re-3arabi)
+- ArabicStreamTapeExtractor — streamtape.com (Abodabodd/re-3arabi)
+- ArabicMixdropExtractor — mixdrop.ag (Abodabodd/re-3arabi)
+- ArabicMp4UploadExtractor — mp4upload.com (Abodabodd/re-3arabi)
+- ArabicVideasExtractor — app.videas.com (Abodabodd/re-3arabi)
+- ArabicVideaExtractor — videa.hu (Abodabodd/re-3arabi)
+- ArabicOkRuExtractor — ok.ru (Abodabodd/re-3arabi)
+- ArabicVkExtractor — vkvideo.ru (Abodabodd/re-3arabi)
+- ArabicMediaFireExtractor — mediafire.com (Abodabodd/re-3arabi)
+- ArabicPixelDrainExtractor — pixeldrain.com (Abodabodd/re-3arabi)
+- ArabicFourSharedExtractor — 4shared.com (Abodabodd/re-3arabi)
+- ArabicGoFileExtractor — gofile.io (Abodabodd/re-3arabi)
+
+---
+
 # تقرير فحص الإضافات — 2026-11-12
 
 المستودعات المفحوصة: 7
