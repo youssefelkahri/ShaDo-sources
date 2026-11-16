@@ -63,14 +63,15 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/Mk5TV.cs3",
     "status": 1,
-    "version": 12,
+    "version": 13,
     "name": "Mk5TV",
     "internalName": "Mk5TV",
     "authors": [
-      "Abodabodd"
+      "Abodabodd",
+      "Youssef"
     ],
-    "description": "",
-    "fileSize": 27730,
+    "description": "5TV: أفلام ومسلسلات (عن مستودع عبود، مسرّعة)",
+    "fileSize": 28324,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -80,7 +81,7 @@
     ],
     "iconUrl": "https://raw.githubusercontent.com/Abodabodd/re-3arabi/refs/heads/main/5TV/icon.png",
     "apiVersion": 1,
-    "fileHash": "sha256-49ff2fb8d9e653de15db627ae2bf7401a53b1b735c5c122227a4d3583e6f4092"
+    "fileHash": "sha256-bc0db5a8ca7a30454a82626f85fefb58a442eb39049d26d1662c66cff8aa41e0"
   },
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAlooyTV.cs3",
@@ -165,5 +166,50 @@
     "iconUrl": "https://yt3.googleusercontent.com/ulm35tweg3do5istps0TgCjMmJSVczGUL2NIrXMwI1DDRi5ty29BIzQSUHVgqZN5CSo1PHhiA6M=s900-c-k-c0x00ffffff-no-rj",
     "apiVersion": 1,
     "fileHash": "sha256-c4a8e0d118a6f962e15b66bf8558aabc453f0c549c6728c13d6ec546f7b33730"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAkwam.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "MkAkwam",
+    "internalName": "MkAkwam",
+    "authors": [
+      "Abodabodd",
+      "Youssef"
+    ],
+    "description": "أكوام: أفلام ومسلسلات (عن مستودع عبود، مسرّعة)",
+    "fileSize": 32064,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "TvSeries",
+      "Movie"
+    ],
+    "apiVersion": 1,
+    "fileHash": "sha256-20955302ef7fae22835ca414354dfd8ffcb21147a17e1dcc12360c671d9c9047"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkCarateen.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "MkCarateen",
+    "internalName": "MkCarateen",
+    "authors": [
+      "Abodabodd",
+      "Youssef"
+    ],
+    "description": "كراتين: كرتون الطفولة (عن مستودع عبود)",
+    "fileSize": 27554,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "Movie",
+      "TvSeries",
+      "Anime",
+      "Cartoon",
+      "Live"
+    ],
+    "apiVersion": 1,
+    "fileHash": "sha256-474df3dba7bb995f8172f4ccff3884638711566af1a9eb3164e9a2b324d59cd3"
   }
 ]
