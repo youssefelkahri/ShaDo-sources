@@ -1,6 +1,31 @@
 {
-  "_doc": "نطاقات مرايا معروفة (تتبدّل). التطبيق يجرّب التالي إن تعطّل الحالي ويقبل تعديلاً يدوياً.",
-  "faselhd": { "domains": ["fasel-hd.co", "fasel-hd.cam", "faselhd.cam", "faselhd.center"], "note": "نطاقات وسيطة مثل webNNNNNx.faselhdx.* تتغيّر باستمرار" },
-  "akwam": { "domains": ["akwam.it", "akwam.com.co", "akw.cam"], "note": "go.akwam.* لروابط المشاهدة" },
-  "index": { "faselhd-db": "https://github.com/Ahmd3301/faselhd-db", "note": "فهرس أعمال جاهز (اسم/غلاف/رابط) محدَّث تلقائياً" }
+ "_doc": "نطاقات مرايا معروفة (تتبدّل). التطبيق يجرّب التالي إن تعطّل الحالي ويقبل تعديلاً يدوياً.",
+ "faselhd": {
+  "domains": [
+   "fasel-hd.co",
+   "fasel-hd.cam",
+   "faselhd.cam",
+   "faselhd.center"
+  ],
+  "note": "نطاقات وسيطة مثل webNNNNNx.faselhdx.* تتغيّر باستمرار"
+ },
+ "akwam": {
+  "domains": [
+   "akwam.it",
+   "akwam.com.co",
+   "akw.cam"
+  ],
+  "note": "go.akwam.* لروابط المشاهدة"
+ },
+ "index": {
+  "faselhd-db": "https://github.com/Ahmd3301/faselhd-db",
+  "note": "فهرس أعمال جاهز (اسم/غلاف/رابط) محدَّث تلقائياً"
+ },
+ "5tv": {
+  "domains": [
+   "5tv.rest",
+   "new61.5tv.lol"
+  ],
+  "note": "العنوان يتغيّر كثيراً (newNN.5tv.lol)؛ 5tv.rest يعمل في 2026-11-16"
+ }
 }
