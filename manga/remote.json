@@ -1,5 +1,5 @@
 {
-  "v": 11,
+  "v": 12,
   "homes": {},
   "sources": [],
   "off": [
@@ -9,7 +9,13 @@
     "hijala",
     "stellarsaber",
     "procomic",
-    "detectiveconanar"
+    "detectiveconanar",
+    "anyonemanga",
+    "comicverse",
+    "eshadow",
+    "lonertranslations",
+    "mangaailand",
+    "murim"
   ],
   "default": "mangalek"
 }
