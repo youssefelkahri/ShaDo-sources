@@ -186,7 +186,8 @@
       "Movie"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-20955302ef7fae22835ca414354dfd8ffcb21147a17e1dcc12360c671d9c9047"
+    "fileHash": "sha256-20955302ef7fae22835ca414354dfd8ffcb21147a17e1dcc12360c671d9c9047",
+    "iconUrl": "https://www.google.com/s2/favicons?domain=akwam.ss&sz=%size%"
   },
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkCarateen.cs3",
@@ -210,6 +211,7 @@
       "Live"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-474df3dba7bb995f8172f4ccff3884638711566af1a9eb3164e9a2b324d59cd3"
+    "fileHash": "sha256-474df3dba7bb995f8172f4ccff3884638711566af1a9eb3164e9a2b324d59cd3",
+    "iconUrl": "https://raw.githubusercontent.com/Abodabodd/re-3arabi/refs/heads/main/Carateen/icon.png"
   }
 ]
