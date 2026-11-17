@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-13T15:34:25.425Z",
+  "checkedAt": "2026-11-17T12:25:27.079Z",
   "sites": {
     "faselhd": {
       "ok": true,
@@ -60,6 +60,28 @@
           "finalHost": "akw.cam",
           "ok": false,
           "challenge": false,
+          "note": "redirects elsewhere"
+        }
+      ]
+    },
+    "5tv": {
+      "ok": false,
+      "best": null,
+      "domains": [
+        {
+          "domain": "5tv.rest",
+          "status": 200,
+          "finalHost": "5tv.rest",
+          "ok": false,
+          "challenge": false,
+          "note": "redirects elsewhere"
+        },
+        {
+          "domain": "new61.5tv.lol",
+          "status": 403,
+          "finalHost": "new61.5tv.lol",
+          "ok": false,
+          "challenge": true,
           "note": "redirects elsewhere"
         }
       ]
