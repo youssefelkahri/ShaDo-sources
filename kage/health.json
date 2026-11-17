@@ -38,8 +38,15 @@
     },
     "akwam": {
       "ok": true,
-      "best": "akwam.it",
+      "best": "akwam.ss",
       "domains": [
+        {
+          "domain": "akwam.ss",
+          "status": 200,
+          "finalHost": "akwam.ss",
+          "ok": true,
+          "challenge": false
+        },
         {
           "domain": "akwam.it",
           "status": 200,
