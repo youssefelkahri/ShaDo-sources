@@ -217,15 +217,15 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkMovieBoxN.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "MkMovieBoxN",
     "internalName": "MkMovieBoxN",
     "authors": [
       "NivinCNC",
       "Youssef"
     ],
-    "description": "MovieBoxN: نسخة NivinCNC من MovieBox (أفلام ومسلسلات بلغات متعددة)",
-    "fileSize": 97785,
+    "description": "MovieBoxN: نسخة NivinCNC من MovieBox (صفحة رئيسية حسب المنطقة)",
+    "fileSize": 95175,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -233,6 +233,6 @@
       "TvSeries"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-acae1c08351b60c33ba531f953ee55aa894742fd05050c352fbec7e149c905bd"
+    "fileHash": "sha256-dbb3f54bb29e5e1e75219d0feda0e027363c15d557c3e667826ae34f3fd44a7b"
   }
 ]
