@@ -152,7 +152,8 @@ async function indexSource(kind, id) {
     const pending = new Set((prev && prev.pending) || []);
     works.forEach(w => { if (!w.x) pending.add(w.u); });
     const changed = new Set();
-    let walked = !!(prev && prev.walked) && !process.env.FULL;
+    // walkv: نسخة قاعدة المرور؛ مرور قديم (توقف عند صفحة فارغة) يُعاد مرة كاملة
+    let walked = !!(prev && prev.walked && prev.walkv === 2) && !process.env.FULL;
     const now = meta.at;
 
     // 1) «الأحدث»: كامل في المرة الأولى، ثم حتى صفحتين بلا جديد
@@ -242,7 +243,7 @@ async function indexSource(kind, id) {
     }));
 
     const all = [...works.values()];
-    const full = { v: 1, kind, id, name: meta.name, home: meta.home, at: now, walked, complete: walked && pending.size === 0,
+    const full = { v: 1, kind, id, name: meta.name, home: meta.home, at: now, walked, walkv: 2, complete: walked && pending.size === 0,
       pop, pending: [...pending], works: all };
     const delta = { v: 1, kind, id, at: now, base: meta.base, pop, works: all.filter(w => changed.has(w.u)) };
     fs.mkdirSync(OUT, { recursive: true });
