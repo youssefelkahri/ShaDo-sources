@@ -1,0 +1,118 @@
+name: Reader page index (manga + novels)
+
+# فهرس الصفحات لتطبيق Elkahri Reader: كل مصدر مانجا وروايات في وظيفة مستقلة.
+# المرة الأولى كاملة (تكمل وحدها في تشغيلات متتالية حتى تنتهي)، ثم كل يوم ما تغيّر فقط.
+# الملفات تُستبدل في إصدار «reader-index» (لا تكبر سجلات المستودع).
+on:
+  schedule:
+    - cron: '41 2 * * *'
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'مصادر محددة (مفصولة بفاصلة)، فارغ = الكل'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: reader-index
+  cancel-in-progress: false
+
+env:
+  TAG: reader-index
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      matrix: ${{ steps.cat.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Chromium
+        run: |
+          npm init -y >/dev/null
+          npm install playwright@1.48.2 >/dev/null
+          npx playwright install --with-deps chromium
+      - id: cat
+        env:
+          ONLY: ${{ github.event.inputs.only }}
+        run: echo "matrix=$(node tools/reader-index/index.js catalog)" >> "$GITHUB_OUTPUT"
+
+  index:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Chromium
+        run: |
+          npm init -y >/dev/null
+          npm install playwright@1.48.2 >/dev/null
+          npx playwright install --with-deps chromium
+      - name: Yesterday's file
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          P=$([ "${{ matrix.kind }}" = manga ] && echo m || echo n)
+          mkdir -p prev
+          gh release download "$TAG" -p "$P-${{ matrix.id }}.json.gz" -D prev 2>/dev/null || echo "first run"
+      - name: Index
+        env:
+          KIND: ${{ matrix.kind }}
+          SRC: ${{ matrix.id }}
+          PREV: prev
+          OUT: out
+          BUDGET_MIN: '300'
+        run: node tools/reader-index/index.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: idx-${{ matrix.kind }}-${{ matrix.id }}
+          path: out/
+          retention-days: 2
+          if-no-files-found: ignore
+
+  publish:
+    needs: index
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: art
+          pattern: idx-*
+          merge-multiple: true
+      - name: Upload to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la art | head -100
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Reader page index" --notes "فهرس صفحات Elkahri Reader (يُستبدل يومياً)."
+          mkdir -p old && gh release download "$TAG" -p reader-index.json -D old 2>/dev/null || true
+          node tools/reader-index/manifest.js old/reader-index.json art art/reader-index.json > summary.txt
+          cat summary.txt
+          shopt -s nullglob
+          files=(art/*.json.gz art/reader-index.json)
+          gh release upload "$TAG" "${files[@]}" --clobber
+      - name: Continue the first full run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if grep -q '^CONTINUE' summary.txt; then gh workflow run reader-index.yml; fi
