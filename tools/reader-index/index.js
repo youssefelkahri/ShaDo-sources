@@ -273,8 +273,10 @@ async function indexSource(kind, id) {
       await E.close();
     }
     const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
+    // مصادر موقوفة مؤقتاً (يقررها المالك): لا تُفهرس حتى تُحذف من skip.json
+    const skip = new Set(readJson(path.join(__dirname, 'skip.json'), []));
     const matrix = [];
-    for (const k of Object.keys(out)) for (const id of out[k]) if (!only || only.includes(id)) matrix.push({ kind: k, id });
+    for (const k of Object.keys(out)) for (const id of out[k]) if ((!only || only.includes(id)) && !skip.has(id)) matrix.push({ kind: k, id });
     console.log(JSON.stringify(matrix));
     return;
   }
