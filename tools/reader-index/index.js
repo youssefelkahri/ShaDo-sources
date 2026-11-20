@@ -179,7 +179,7 @@ async function indexSource(kind, id) {
         if (!w) {
           works.set(it.url, { u: it.url, t: it.title, c: it.cover || '', l: it.latest || '', r: it.rating || '', up: now - pos });
           pending.add(it.url); changed.add(it.url); fresh++;
-        } else if ((it.latest || '') !== (w.l || '') || (it.title && it.title !== w.t)) {
+        } else if (it.cover && w.c !== it.cover && !w.cb) { w.c = it.cover; pos++; continue; } else if ((it.latest || '') !== (w.l || '') || (it.title && it.title !== w.t)) {
           w.l = it.latest || ''; w.t = it.title || w.t; if (it.cover) w.c = it.cover; if (it.rating) w.r = it.rating;
           w.up = now - pos; pending.add(it.url); changed.add(it.url); fresh++;
         }
@@ -224,7 +224,8 @@ async function indexSource(kind, id) {
         }
       }
       if (m.title) w.t = m.title;
-      if (m.cover) w.c = m.cover;
+      // الغلاف في القوائم = الصورة المصغّرة من صفحة القائمة (خفيفة)؛ الكبير من صفحة العمل في cb
+      if (m.cover && m.cover !== w.c) { if (w.c) w.cb = m.cover; else w.c = m.cover; }
       w.d = (m.summary || m.description || '').slice(0, 3000);
       w.s = m.status || '';
       w.g = (m.genres || []).map(g => typeof g === 'string' ? g : (g && (g.name || g.title)) || '').filter(Boolean);
