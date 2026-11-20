@@ -1,0 +1,40 @@
+name: Reader index — publish finished sources now
+
+# ينشر المصادر التي انتهت من تشغيل جارٍ دون انتظار البقية (run_id = رقم التشغيل).
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'رقم تشغيل reader-index'
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  TAG: reader-index
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: art
+          pattern: idx-*
+          merge-multiple: true
+          run-id: ${{ github.event.inputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Upload to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Reader page index" --notes "فهرس صفحات Elkahri Reader (يُستبدل يومياً)."
+          mkdir -p old && gh release download "$TAG" -p reader-index.json -D old 2>/dev/null || true
+          node tools/reader-index/manifest.js old/reader-index.json art art/reader-index.json
+          shopt -s nullglob
+          files=(art/*.json.gz art/reader-index.json)
+          gh release upload "$TAG" "${files[@]}" --clobber

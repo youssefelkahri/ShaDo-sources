@@ -79,6 +79,26 @@ jobs:
           OUT: out
           BUDGET_MIN: '300'
         run: node tools/reader-index/index.js
+      - name: Publish this source now (no waiting for the others)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+          f=(out/*.json.gz); [ ${#f[@]} -gt 0 ] || exit 0
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Reader page index" --notes "فهرس صفحات Elkahri Reader (يُستبدل يومياً)." || true
+          gh release upload "$TAG" "${f[@]}" --clobber
+          # الفهرس العام: أضف سطر هذا المصدر (مع إعادة المحاولة إن كتبت وظيفة أخرى في نفس اللحظة)
+          key=$(basename out/*.meta.json .meta.json)
+          for i in 1 2 3 4 5 6; do
+            mkdir -p man$i chk$i
+            gh release download "$TAG" -p reader-index.json -D man$i 2>/dev/null || true
+            node tools/reader-index/manifest.js man$i/reader-index.json out out/reader-index.json >/dev/null
+            gh release upload "$TAG" out/reader-index.json --clobber
+            sleep $((RANDOM % 8 + 3))
+            gh release download "$TAG" -p reader-index.json -D chk$i
+            if node -e "const m=require('./chk$i/reader-index.json'),o=require('./out/'+process.argv[1]+'.meta.json');process.exit(m.sources[process.argv[1]]&&m.sources[process.argv[1]].at===o.at?0:1)" "$key"; then echo "published $key"; break; fi
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
