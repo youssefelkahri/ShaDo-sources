@@ -12,6 +12,10 @@ on:
         description: 'مصادر محددة (مفصولة بفاصلة)، فارغ = الكل'
         required: false
         default: ''
+      full:
+        description: 'إعادة مرور كامل على القوائم (1 = نعم)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -78,6 +82,7 @@ jobs:
           PREV: prev
           OUT: out
           BUDGET_MIN: '300'
+          FULL: ${{ github.event.inputs.full }}
         run: node tools/reader-index/index.js
       - name: Publish this source now (no waiting for the others)
         if: always()

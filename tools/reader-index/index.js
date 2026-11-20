@@ -152,17 +152,25 @@ async function indexSource(kind, id) {
     const pending = new Set((prev && prev.pending) || []);
     works.forEach(w => { if (!w.x) pending.add(w.u); });
     const changed = new Set();
-    let walked = !!(prev && prev.walked);
+    let walked = !!(prev && prev.walked) && !process.env.FULL;
     const now = meta.at;
 
     // 1) «الأحدث»: كامل في المرة الأولى، ثم حتى صفحتين بلا جديد
     let pos = 0, quiet = 0, lastFirst = null;
     for (let page = 1; page <= 3000 && Date.now() < DEADLINE; page++) {
-      let r = await E.call('list', { id }, { page, listing: latest });
-      if (r.error) { await sleep(3000); r = await E.call('list', { id }, { page, listing: latest }); }
-      if (r.error) { meta.listError = String(r.error).slice(0, 200); break; }
+      // صفحة فارغة أو خطأ في الوسط غالباً حدّ طلبات مؤقت من الموقع، لا نهاية القائمة: انتظار وإعادة
+      let r = null;
+      for (let t = 0; t < 5; t++) {
+        r = await E.call('list', { id }, { page, listing: latest });
+        if (!r.error && r.items && r.items.length) break;
+        if (!r.error && page > 1 && r.hasNext === false) break;
+        await sleep(4000 * (t + 1));
+      }
+      if (r.error) { meta.listError = 'ص ' + page + ': ' + String(r.error).slice(0, 180); break; }
       const items = r.items || [];
-      if (!items.length || items[0].url === lastFirst) { walked = true; break; }
+      if (!items.length) { if (page === 1 || r.hasNext === false) walked = true; else meta.listError = 'صفحة فارغة ' + page; break; }
+      if (items[0].url === lastFirst) { walked = true; break; }
+      await sleep(250);
       lastFirst = items[0].url;
       let fresh = 0;
       for (const it of items) {
