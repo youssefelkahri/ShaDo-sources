@@ -1,6 +1,8 @@
 {
-  "v": 12,
-  "homes": {},
+  "v": 13,
+  "homes": {
+    "mangaswat": "https://appswat.com"
+  },
   "sources": [],
   "off": [
     "asgardscans",
