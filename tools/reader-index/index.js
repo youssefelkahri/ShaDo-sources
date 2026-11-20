@@ -176,10 +176,12 @@ async function indexSource(kind, id) {
       let fresh = 0;
       for (const it of items) {
         const w = works.get(it.url);
+        // غلاف القائمة (المصغّر) هو غلاف البطاقات دائماً
+        if (w && it.cover && w.c !== it.cover) { if (!w.cb && w.c) w.cb = w.c; w.c = it.cover; }
         if (!w) {
           works.set(it.url, { u: it.url, t: it.title, c: it.cover || '', l: it.latest || '', r: it.rating || '', up: now - pos });
           pending.add(it.url); changed.add(it.url); fresh++;
-        } else if (it.cover && w.c !== it.cover && !w.cb) { w.c = it.cover; pos++; continue; } else if ((it.latest || '') !== (w.l || '') || (it.title && it.title !== w.t)) {
+        } else if ((it.latest || '') !== (w.l || '') || (it.title && it.title !== w.t)) {
           w.l = it.latest || ''; w.t = it.title || w.t; if (it.cover) w.c = it.cover; if (it.rating) w.r = it.rating;
           w.up = now - pos; pending.add(it.url); changed.add(it.url); fresh++;
         }
