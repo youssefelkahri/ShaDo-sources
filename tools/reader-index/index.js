@@ -211,7 +211,9 @@ async function indexSource(kind, id) {
     // 2) «الأكثر مشاهدة»: الترتيب من صفحات الموقع (حتى 15 صفحة)
     const pop = {};
     let rank = 0; lastFirst = null;
-    for (let page = 1; page <= 15 && Date.now() < DEADLINE; page++) {
+    // مرة واحدة: «الأكثر مشاهدة» كاملاً (في بعض المصادر هو الكتالوج كله بينما «الأحدث» آخر التحديثات فقط، مثل سوات)
+    const popFull = !(prev && prev.popv === 2);
+    for (let page = 1; page <= (popFull ? 3000 : 15) && Date.now() < DEADLINE; page++) {
       const r = await E.call('list', { id }, { page, listing: popular });
       if (r.error || !r.items || !r.items.length || r.items[0].url === lastFirst) break;
       lastFirst = r.items[0].url;
@@ -263,7 +265,7 @@ async function indexSource(kind, id) {
     }));
 
     const all = [...works.values()];
-    const full = { v: 1, kind, id, name: meta.name, home: meta.home, at: now, walked, walkv: 2, complete: walked && pending.size === 0,
+    const full = { v: 1, kind, id, name: meta.name, home: meta.home, at: now, walked, walkv: 2, popv: 2, complete: walked && pending.size === 0,
       pop, pending: [...pending], works: all };
     const delta = { v: 1, kind, id, at: now, base: meta.base, pop, works: all.filter(w => changed.has(w.u)) };
     fs.mkdirSync(OUT, { recursive: true });
