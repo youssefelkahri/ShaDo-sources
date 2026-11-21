@@ -21,7 +21,24 @@ const KINDS = {
   novel: { dir: 'novel', host: 'novels.local', remote: 'novels/remote.json', prefix: 'n' },
 };
 
-function curl(url, opt) {
+// نسخ الموقع الواحد: إن تعطّل نطاق نجرّب التالي (نفس الرابط بنطاق آخر)
+const MIRRORS = [['mangalik.net', 'manga-lionz.org', 'sparkmanga.net', 'link-manga.net', 'starzmanga.net']];
+const mirrorActive = MIRRORS.map(() => 0);
+async function curl(url, opt) {
+  let u; try { u = new URL(url); } catch (e) { return curl1(url, opt); }
+  const g = MIRRORS.findIndex(hs => hs.includes(u.hostname.replace(/^www\./, '')));
+  if (g < 0) return curl1(url, opt);
+  let last;
+  for (let t = 0; t < MIRRORS[g].length; t++) {
+    const h = MIRRORS[g][mirrorActive[g] % MIRRORS[g].length];
+    u.hostname = h;
+    last = await curl1(u.toString(), opt);
+    if (!last.error && last.status < 500 && last.status !== 403 && last.status !== 429) return last;
+    mirrorActive[g]++;
+  }
+  return last;
+}
+function curl1(url, opt) {
   return new Promise(res => {
     const a = ['-s', '-L', '--compressed', '-m', '30', '-A', UA, '-w', '\n__META__%{http_code} %{url_effective}', '-X', opt.method || 'GET'];
     for (const [k, v] of Object.entries(opt.headers || {})) a.push('-H', k + ': ' + v);
