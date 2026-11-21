@@ -1,5 +1,25 @@
 [
   {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkMovieBox.cs3",
+    "status": 1,
+    "version": 11,
+    "name": "MkMovieBox",
+    "internalName": "MkMovieBox",
+    "authors": [
+      "Youssef"
+    ],
+    "description": "MovieBox: أفلام ومسلسلات بترجمات متعددة (مصدر مكتبتي الخاص)",
+    "fileSize": 118543,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "Movie",
+      "TvSeries"
+    ],
+    "apiVersion": 1,
+    "fileHash": "sha256-fceda64f97eafee1bf43ae82b5dbd7fcd2fc0bf7c20713d623dc3d1739752939"
+  },
+  {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAnime3rb.cs3",
     "status": 1,
     "version": 2,
