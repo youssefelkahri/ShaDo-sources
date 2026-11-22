@@ -3,8 +3,16 @@
   "sites": {
     "faselhd": {
       "ok": true,
-      "best": "fasel-hd.co",
+      "best": "faselhd.cc",
       "domains": [
+        {
+          "domain": "faselhd.cc",
+          "status": 200,
+          "finalHost": "www.faselhd.cc",
+          "ok": true,
+          "challenge": false,
+          "note": "set by hand 2026-11-22: the site's current address (fasel-hd.co now sends on with a script)"
+        },
         {
           "domain": "fasel-hd.co",
           "status": 200,
