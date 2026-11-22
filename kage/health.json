@@ -3,7 +3,7 @@
   "sites": {
     "faselhd": {
       "ok": true,
-      "best": "fasel-hd.co",
+      "best": null,
       "domains": [
         {
           "domain": "fasel-hd.co",
