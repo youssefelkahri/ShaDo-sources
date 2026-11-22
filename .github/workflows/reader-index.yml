@@ -97,7 +97,8 @@ jobs:
           key=$(basename out/*.meta.json .meta.json)
           for i in 1 2 3 4 5 6; do
             mkdir -p man$i chk$i
-            gh release download "$TAG" -p reader-index.json -D man$i 2>/dev/null || true
+            # never write from a missing copy (another job is replacing it): that would wipe every other line (MangaDar was lost so)
+            gh release download "$TAG" -p reader-index.json -D man$i 2>/dev/null || { sleep 5; continue; }
             node tools/reader-index/manifest.js man$i/reader-index.json out out/reader-index.json >/dev/null
             # وظيفتان ترفعان في نفس اللحظة تعطيان 422: ننتظر ونعيد
             gh release upload "$TAG" out/reader-index.json --clobber || true
@@ -131,7 +132,9 @@ jobs:
         run: |
           ls -la art | head -100
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Reader page index" --notes "فهرس صفحات Elkahri Reader (يُستبدل يومياً)."
-          mkdir -p old && gh release download "$TAG" -p reader-index.json -D old 2>/dev/null || true
+          mkdir -p old
+          for i in 1 2 3 4 5; do gh release download "$TAG" -p reader-index.json -D old --clobber 2>/dev/null && break; sleep 6; done
+          [ -f old/reader-index.json ] || { echo "manifest not readable, not overwriting it"; exit 1; }
           node tools/reader-index/manifest.js old/reader-index.json art art/reader-index.json > summary.txt
           cat summary.txt
           shopt -s nullglob
