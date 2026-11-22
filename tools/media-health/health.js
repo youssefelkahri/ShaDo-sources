@@ -47,10 +47,7 @@ async function probe(domain) {
       }
     }
     const best = results.find(r => r.ok && !r.challenge) || results.find(r => r.ok);
-    // selfAddress: the extension finds the site's current address by itself (FaselHD: landing pages like fasel-hd.co
-    // send you on to webNNNNNx.faselhdx.*). Choosing one here forced the landing page on it and broke it (2026-11-22).
-    const pick = entry.selfAddress ? null : (best ? (best.finalHost || best.domain) : null);
-    report.sites[key] = { ok: !!best, best: pick, domains: results };
+    report.sites[key] = { ok: !!best, best: best ? (best.finalHost || best.domain) : null, domains: results };
     console.log(`${key}: ${best ? 'ok ' + report.sites[key].best : 'DOWN'}`);
   }
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2) + '\n');
