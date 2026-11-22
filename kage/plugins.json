@@ -2,14 +2,14 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkMovieBox.cs3",
     "status": 1,
-    "version": 11,
+    "version": 12,
     "name": "MkMovieBox",
     "internalName": "MkMovieBox",
     "authors": [
       "Youssef"
     ],
     "description": "MovieBox: أفلام ومسلسلات بترجمات متعددة (مصدر مكتبتي الخاص)",
-    "fileSize": 118543,
+    "fileSize": 118940,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -17,28 +17,7 @@
       "TvSeries"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-fceda64f97eafee1bf43ae82b5dbd7fcd2fc0bf7c20713d623dc3d1739752939"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/NivinCNC/CNCVerse-Cloud-Stream-Extension/builds/MovieBoxProviderIN.cs3",
-    "status": 1,
-    "version": 57,
-    "name": "MovieBoxIN",
-    "internalName": "MovieBoxProviderIN",
-    "authors": [
-      "NivinCNC"
-    ],
-    "description": "MovieBox (نسخة CNCVerse): أفلام ومسلسلات بلغات متعددة — إضافة جانبية بجانب MkMovieBox",
-    "fileSize": 92436,
-    "repositoryUrl": "https://github.com/NivinCNC/CNCVerse-Cloud-Stream-Extension",
-    "language": "ar",
-    "tvTypes": [
-      "Movie",
-      "TvSeries"
-    ],
-    "apiVersion": 1,
-    "iconUrl": "https://github.com/NivinCNC/CNCVerse-Cloud-Stream-Extension/raw/refs/heads/master/Logos/MovieBoxProviderIN/icon.png",
-    "fileHash": "sha256-4e620c234f7df0d2da70629c82dfad9353a374e65f54dd4357e457b8decf9a7e"
+    "fileHash": "ffb6a4b60cf96b88dd9a59968ae223f0803abb64aa6a5630a9f6744d18098ea2"
   },
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAnime3rb.cs3",
