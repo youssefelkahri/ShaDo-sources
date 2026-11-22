@@ -137,6 +137,13 @@ jobs:
           [ -f old/reader-index.json ] || { echo "manifest not readable, not overwriting it"; exit 1; }
           node tools/reader-index/manifest.js old/reader-index.json art art/reader-index.json > summary.txt
           cat summary.txt
+          # a source whose file is in the release but whose line was lost (phone-indexed ones are not re-added by any job)
+          mkdir -p orph
+          for a in $(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.assets[].name' | grep -E '^[mn]-.*\.json\.gz$' | grep -v '\.delta\.'); do
+            k=${a%.json.gz}
+            node -e "process.exit(require('./art/reader-index.json').sources[process.argv[1]]?1:0)" "$k" && gh release download "$TAG" -p "$a" -D orph || true
+          done
+          node tools/reader-index/orphans.js art/reader-index.json orph
           shopt -s nullglob
           files=(art/*.json.gz art/reader-index.json)
           gh release upload "$TAG" "${files[@]}" --clobber
