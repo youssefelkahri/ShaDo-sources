@@ -10,9 +10,10 @@ for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.json.gz') && !f.inc
   try {
     const raw = fs.readFileSync(path.join(dir, f));
     const d = JSON.parse(zlib.gunzipSync(raw).toString('utf8'));
+    const works = Array.isArray(d.works) ? d.works.length : (d.works || 0);
     man.sources[key] = { kind: d.kind, id: d.id, name: d.name || d.id, home: d.home || '', at: d.at, file: f, size: raw.length,
-      count: d.works || 0, detailed: d.complete ? (d.works || 0) : 0, complete: !!d.complete, ...(d.by ? { by: d.by } : {}) };
-    console.log(`↺ ${key}: ${d.works} عمل`); n++;
+      count: works, detailed: d.complete ? works : 0, complete: !!d.complete, ...(d.by ? { by: d.by } : {}) };
+    console.log(`↺ ${key}: ${works} عمل`); n++;
   } catch (e) { console.log(`✗ ${key}: ${e.message}`); }
 }
 fs.writeFileSync(manF, JSON.stringify(man));
