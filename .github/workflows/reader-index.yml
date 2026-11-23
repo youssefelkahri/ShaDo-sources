@@ -134,7 +134,14 @@ jobs:
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Reader page index" --notes "فهرس صفحات Elkahri Reader (يُستبدل يومياً)."
           mkdir -p old
           for i in 1 2 3 4 5; do gh release download "$TAG" -p reader-index.json -D old --clobber 2>/dev/null && break; sleep 6; done
-          [ -f old/reader-index.json ] || { echo "manifest not readable, not overwriting it"; exit 1; }
+          if [ ! -f old/reader-index.json ]; then
+            # truly gone from the release (not a failed download): rebuild it; the orphans step below brings back every source's line
+            if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.assets[].name' | grep -qx 'reader-index.json'; then
+              echo "manifest not readable, not overwriting it"; exit 1
+            fi
+            echo "manifest missing from the release: rebuilding it from the files"
+            echo '{"sources":{}}' > old/reader-index.json
+          fi
           node tools/reader-index/manifest.js old/reader-index.json art art/reader-index.json > summary.txt
           cat summary.txt
           # a source whose file is in the release but whose line was lost (phone-indexed ones are not re-added by any job)
