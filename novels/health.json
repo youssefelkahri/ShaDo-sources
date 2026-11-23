@@ -1,5 +1,5 @@
 {
-  "checked": "2026-11-16",
+  "checked": "2026-11-23",
   "sources": {
     "kolnovel": {
       "status": 200,
@@ -14,9 +14,9 @@
       "fails": 0
     },
     "riwayatarab": {
-      "status": 503,
-      "ok": false,
-      "blocked": true,
+      "status": 200,
+      "ok": true,
+      "blocked": false,
       "fails": 0
     },
     "seanovel": {
