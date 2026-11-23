@@ -1,0 +1,18 @@
+{
+  "v": 1,
+  "disabled": false,
+  "requireCode": false,
+  "message": "",
+  "minCode": 0,
+  "graceDays": 3,
+  "blockedDevices": [],
+  "codes": {
+    "671525a061ed88c9e05eb704a0534a7662fbc857f59bfae40e37a2fe11fa502d": {
+      "name": "محمد",
+      "max": 1,
+      "blocked": false,
+      "created": 1795451337147,
+      "devices": {}
+    }
+  }
+}
