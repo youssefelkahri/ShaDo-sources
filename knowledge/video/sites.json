@@ -251,7 +251,7 @@
  },
  {
   "id": "MyCimaProvider",
-  "host": "https://mycima.living",
+  "host": "https://mycima.recipes",
   "traits": [
    "cloudflare",
    "webview",
@@ -259,7 +259,11 @@
    "iframe"
   ],
   "extractors": [],
-  "ref": "Abodabodd/re-3arabi"
+  "ref": "Abodabodd/re-3arabi",
+  "prev": [
+   "https://mycima.living"
+  ],
+  "seen": "2026-11-23"
  },
  {
   "id": "OscarTv",
@@ -467,5 +471,14 @@
   "extractors": [],
   "ref": "Abodabodd/re-3arabi",
   "added": "2026-11-12"
+ },
+ {
+  "id": "Vodu",
+  "name": "Vodu",
+  "host": "https://movie.vodu.me",
+  "traits": [],
+  "extractors": [],
+  "ref": "Abodabodd/re-3arabi",
+  "added": "2026-11-23"
  }
 ]

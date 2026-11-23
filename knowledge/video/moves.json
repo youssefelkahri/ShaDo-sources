@@ -1,6 +1,7 @@
 {
  "_doc": "انتقال المواقع المكتشف من إضافات CloudStream: النطاق القديم ← الجديد. تُدمج في نواة الفيديو.",
  "moves": {
-  "wecima.ac": "https://wecima.lifestyle"
+  "wecima.ac": "https://wecima.lifestyle",
+  "mycima.living": "https://mycima.recipes"
  }
 }

@@ -1,3 +1,16 @@
+# تقرير فحص الإضافات — 2026-11-23
+
+المستودعات المفحوصة: 7
+
+### مواقع انتقلت لنطاق جديد (طُبّقت تلقائياً في نواة الفيديو) (1)
+- MyCima: https://mycima.living ← https://mycima.recipes (Abodabodd/re-3arabi)
+### مواقع عربية جديدة لها إضافة (1)
+- Vodu — https://movie.vodu.me (Abodabodd/re-3arabi/Vodu/src/main/kotlin/com/vodu/vodu.kt)
+### مستخرجات فيديو جديدة (للمراجعة) (0)
+- لا شيء
+
+---
+
 # تقرير فحص الإضافات — 2026-11-16
 
 المستودعات المفحوصة: 7
