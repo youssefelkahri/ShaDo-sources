@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-17T12:25:27.079Z",
+  "checkedAt": "2026-11-24T14:14:35.007Z",
   "sites": {
     "faselhd": {
       "ok": true,
@@ -7,25 +7,24 @@
       "domains": [
         {
           "domain": "faselhd.cc",
-          "status": 200,
-          "finalHost": "www.faselhd.cc",
+          "status": 403,
+          "finalHost": "faselhd.cc",
           "ok": true,
-          "challenge": false,
-          "note": "set by hand 2026-11-22: the site's current address (fasel-hd.co now sends on with a script)"
+          "challenge": true
         },
         {
           "domain": "fasel-hd.co",
-          "status": 200,
-          "finalHost": "fasel-hd.co",
+          "status": 403,
+          "finalHost": "faselhd.cc",
           "ok": true,
-          "challenge": false
+          "challenge": true
         },
         {
           "domain": "fasel-hd.cam",
-          "status": 200,
-          "finalHost": "fasel-hd.co",
+          "status": 403,
+          "finalHost": "faselhd.cc",
           "ok": true,
-          "challenge": false
+          "challenge": true
         },
         {
           "domain": "faselhd.cam",
@@ -37,10 +36,10 @@
         },
         {
           "domain": "faselhd.center",
-          "status": 200,
-          "finalHost": "fasel-hd.co",
+          "status": 403,
+          "finalHost": "faselhd.cc",
           "ok": true,
-          "challenge": false
+          "challenge": true
         }
       ]
     },
