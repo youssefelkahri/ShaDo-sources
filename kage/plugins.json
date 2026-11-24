@@ -178,7 +178,7 @@
       "Youssef"
     ],
     "description": "أكوام: أفلام ومسلسلات (عن مستودع عبود، مسرّعة)",
-    "fileSize": 34901,
+    "fileSize": 31751,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -186,8 +186,9 @@
       "Movie"
     ],
     "apiVersion": 1,
-    "fileHash": "ff79acf19525667e92ba63605fad38594d8316e863e3cedb038f7087b690c576",
-    "iconUrl": "https://www.google.com/s2/favicons?domain=akwam.ss&sz=%size%"
+    "fileHash": "sha256-50a50e6aebbecd5ecc0c145a7920dcc0e63a5d3381a2f67eb1156ecfad9d6b4f",
+    "iconUrl": "https://www.google.com/s2/favicons?domain=akwam.ss&sz=%size%",
+    "upstreamVersion": 4
   },
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkCarateen.cs3",
