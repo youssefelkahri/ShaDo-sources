@@ -170,7 +170,7 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAkwam.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "MkAkwam",
     "internalName": "MkAkwam",
     "authors": [
@@ -178,7 +178,7 @@
       "Youssef"
     ],
     "description": "أكوام: أفلام ومسلسلات (عن مستودع عبود، مسرّعة)",
-    "fileSize": 32064,
+    "fileSize": 34901,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -186,7 +186,7 @@
       "Movie"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-20955302ef7fae22835ca414354dfd8ffcb21147a17e1dcc12360c671d9c9047",
+    "fileHash": "ff79acf19525667e92ba63605fad38594d8316e863e3cedb038f7087b690c576",
     "iconUrl": "https://www.google.com/s2/favicons?domain=akwam.ss&sz=%size%"
   },
   {
