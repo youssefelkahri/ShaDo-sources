@@ -63,7 +63,7 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/Mk5TV.cs3",
     "status": 1,
-    "version": 13,
+    "version": 14,
     "name": "Mk5TV",
     "internalName": "Mk5TV",
     "authors": [
@@ -71,7 +71,7 @@
       "Youssef"
     ],
     "description": "5TV: أفلام ومسلسلات (عن مستودع عبود، مسرّعة)",
-    "fileSize": 28324,
+    "fileSize": 30226,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -81,7 +81,7 @@
     ],
     "iconUrl": "https://raw.githubusercontent.com/Abodabodd/re-3arabi/refs/heads/main/5TV/icon.png",
     "apiVersion": 1,
-    "fileHash": "sha256-bc0db5a8ca7a30454a82626f85fefb58a442eb39049d26d1662c66cff8aa41e0"
+    "fileHash": "e07eaf8029df05d4f1a32d9ff064c1c2716d449f17ba744aa5b5b197da96995a"
   },
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAlooyTV.cs3",
