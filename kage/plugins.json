@@ -214,5 +214,26 @@
     "apiVersion": 1,
     "fileHash": "sha256-474df3dba7bb995f8172f4ccff3884638711566af1a9eb3164e9a2b324d59cd3",
     "iconUrl": "https://raw.githubusercontent.com/Abodabodd/re-3arabi/refs/heads/main/Carateen/icon.png"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkMovieBoxIN.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "MkMovieBoxIN",
+    "internalName": "MkMovieBoxIN",
+    "authors": [
+      "NivinCNC",
+      "Youssef"
+    ],
+    "description": "MovieBoxIN: صفحة رئيسية حسب منطقتك (عربي، تركي، رمضان…) مع وضع العائلة",
+    "fileSize": 95177,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "Movie",
+      "TvSeries"
+    ],
+    "apiVersion": 1,
+    "fileHash": "sha256-dd094bc2731950073da3587e324c916d4811dc0eca207535a427544d5b67e1ee"
   }
 ]
