@@ -217,14 +217,14 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkForja.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "MkForja",
     "internalName": "MkForja",
     "authors": [
       "Youssef"
     ],
     "description": "فرجة Forja: مسلسلات وأفلام ومسرحيات مغربية من SNRT",
-    "fileSize": 18888,
+    "fileSize": 20684,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -232,6 +232,6 @@
       "Movie"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-0f39b0466473abbbb9b02a1f604475a48763ec80005dd6f1d3a06c794b73c945"
+    "fileHash": "sha256-46f75158c2d9dbef1a929b79c045124b1fac7c9f9961123eb100904a1a1daf7b"
   }
 ]
