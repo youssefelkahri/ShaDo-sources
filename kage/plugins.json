@@ -233,5 +233,27 @@
     ],
     "apiVersion": 1,
     "fileHash": "sha256-f9160608ae42afff5e01e3199113c452f4d49e01d64d79f2b3386c48aa66b9c0"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkMovieBoxWeb.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "MkMovieBoxWeb",
+    "internalName": "MkMovieBoxWeb",
+    "authors": [
+      "Youssef"
+    ],
+    "description": "MovieBox من واجهة موقعه فقط: صفحة محلية، بحث، نسخ عربية ومدبلجة، ترجمات",
+    "fileSize": 31739,
+    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
+    "language": "ar",
+    "tvTypes": [
+      "Movie",
+      "TvSeries",
+      "Anime",
+      "AsianDrama"
+    ],
+    "apiVersion": 1,
+    "fileHash": "sha256-427d4fb8a8a0a6f904acc0accec5e553d10d281e1f4977fd0718a3794c44a33d"
   }
 ]
