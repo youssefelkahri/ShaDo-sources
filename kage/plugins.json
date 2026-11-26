@@ -237,14 +237,14 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkMovieBoxWeb.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "MkMovieBoxWeb",
     "internalName": "MkMovieBoxWeb",
     "authors": [
       "Youssef"
     ],
     "description": "MovieBox من واجهة موقعه فقط: صفحة محلية، بحث، نسخ عربية ومدبلجة، ترجمات",
-    "fileSize": 31739,
+    "fileSize": 32736,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -254,6 +254,6 @@
       "AsianDrama"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-427d4fb8a8a0a6f904acc0accec5e553d10d281e1f4977fd0718a3794c44a33d"
+    "fileHash": "sha256-35de3fcff5331cf08edbd04fcf8cd91f3440cb693128d0a8871b67e9985b4928"
   }
 ]
