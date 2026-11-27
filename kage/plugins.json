@@ -86,23 +86,24 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAlooyTV.cs3",
     "status": 1,
-    "version": 12,
+    "version": 13,
     "name": "MkAlooyTV",
     "internalName": "MkAlooyTV",
     "authors": [
-      "Abodabodd"
+      "Youssef"
     ],
-    "description": "",
-    "fileSize": 15703,
+    "description": "AlooyTV: مسلسلات عربية وخليجية وتركية مدبلجة ورمضان (مصدرنا الخاص)",
+    "fileSize": 18206,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
       "TvSeries",
-      "Movie"
+      "Movie",
+      "Anime"
     ],
     "iconUrl": "https://fitnur.com/uploads/avatars/c5ae8dadf88bcea9549657ec451a1563.jpg",
     "apiVersion": 1,
-    "fileHash": "sha256-20a9064f608202218c2f35914bfc8cfb4d6d86bc15c5564f0ee2f392c1a65886"
+    "fileHash": "sha256-113047c4ad117f45c2ebe4eb9843deab8b38cb8ad992f6c1ede83c1b4c8b20de"
   },
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkEgyWatch.cs3",
@@ -255,26 +256,5 @@
     ],
     "apiVersion": 1,
     "fileHash": "sha256-35de3fcff5331cf08edbd04fcf8cd91f3440cb693128d0a8871b67e9985b4928"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkAlooy.cs3",
-    "status": 1,
-    "version": 1,
-    "name": "MkAlooy",
-    "internalName": "MkAlooy",
-    "authors": [
-      "Youssef"
-    ],
-    "description": "AlooyTV: مسلسلات عربية وخليجية وتركية مدبلجة ورمضان (مصدرنا الخاص)",
-    "fileSize": 18024,
-    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
-    "language": "ar",
-    "tvTypes": [
-      "TvSeries",
-      "Movie",
-      "Anime"
-    ],
-    "apiVersion": 1,
-    "fileHash": "sha256-30d0451485e6a5e784574257a4693f428812a06b5349be3ae309f55543928254"
   }
 ]
