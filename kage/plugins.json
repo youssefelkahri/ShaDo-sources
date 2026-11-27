@@ -282,20 +282,20 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkMarocLive.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "MkMarocLive",
     "internalName": "MkMarocLive",
     "authors": [
       "Youssef"
     ],
     "description": "قنوات مغربية مباشرة: 2M، الأولى، الرياضية، المغربية، تمازيغت، ميدي 1… (البث الرسمي)",
-    "fileSize": 18238,
+    "fileSize": 18333,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
       "Live"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-8a411d700231493f43f821daa1bcae98bb9a6b9e6c89949d50944b8290823273"
+    "fileHash": "sha256-d962dae16d13d2ac06aa9a8707aa16d60eafdb590ec9adbd700cc98bdab93d40"
   }
 ]
