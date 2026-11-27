@@ -260,14 +260,14 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkArabSeed.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "MkArabSeed",
     "internalName": "MkArabSeed",
     "authors": [
       "Youssef"
     ],
     "description": "عرب سيد ArabSeed: أفلام ومسلسلات عربية وأجنبية وتركية ورمضان (مصدرنا الخاص)",
-    "fileSize": 27455,
+    "fileSize": 32596,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -277,6 +277,6 @@
       "AsianDrama"
     ],
     "apiVersion": 1,
-    "fileHash": "sha256-c4b603648d52ffb0567f9e663f5b462dc4205894d3e6cb4d3e064055bd89706f"
+    "fileHash": "sha256-c0a9039c2c67d539d091b65e5bb88b06545fd408a3513fa6f6bef84da244f51a"
   }
 ]
