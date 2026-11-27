@@ -108,14 +108,14 @@
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkEgyWatch.cs3",
     "status": 1,
-    "version": 13,
+    "version": 14,
     "name": "MkEgyWatch",
     "internalName": "MkEgyWatch",
     "authors": [
       "Abodabodd"
     ],
     "description": "",
-    "fileSize": 52834,
+    "fileSize": 55088,
     "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
     "language": "ar",
     "tvTypes": [
@@ -124,7 +124,7 @@
     ],
     "iconUrl": "https://raw.githubusercontent.com/Abodabodd/re-3arabi/refs/heads/main/Egy/icon.png",
     "apiVersion": 1,
-    "fileHash": "sha256-c80b83e6e02275ce56ace424935de9a5bd5bb7a5aa1c712774b29ccdd1f33139"
+    "fileHash": "sha256-10479ea892a3dc6c9b042ebfc4b45a8d53e185677e6b34da0d2f218fc00ea4cd"
   },
   {
     "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkLodyNet.cs3",
