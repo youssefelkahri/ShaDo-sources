@@ -297,24 +297,5 @@
     ],
     "apiVersion": 1,
     "fileHash": "sha256-8a411d700231493f43f821daa1bcae98bb9a6b9e6c89949d50944b8290823273"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/youssefelkahri/ShaDo-sources/main/kage/MkReplay.cs3",
-    "status": 1,
-    "version": 1,
-    "name": "MkReplay",
-    "internalName": "MkReplay",
-    "authors": [
-      "Youssef"
-    ],
-    "description": "مباريات معادة كاملة وملخصات: الأبطال، الإنجليزي، الإسباني، الإيطالي، المنتخبات… (مصدرنا الخاص)",
-    "fileSize": 21121,
-    "repositoryUrl": "https://github.com/youssefelkahri/ShaDo-sources",
-    "language": "ar",
-    "tvTypes": [
-      "Others"
-    ],
-    "apiVersion": 1,
-    "fileHash": "sha256-5d46adb5cad4ec96538898906d03a53b1d485b7fc0d6cd18cf0964edbdf1e075"
   }
 ]
