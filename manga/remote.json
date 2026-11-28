@@ -1,5 +1,5 @@
 {
-  "v": 28,
+  "v": 29,
   "homes": {
     "mangaswat": "https:\/\/appswat.com"
   },
@@ -29,7 +29,8 @@
     "despairmanga",
     "lonertranslations",
     "mangatales",
-    "mangadar"
+    "mangadar",
+    "lavascans"
   ],
   "default": "mangalek"
 }
