@@ -1,5 +1,5 @@
 {
-  "v": 34,
+  "v": 35,
   "homes": {
     "mangaswat": "https:\/\/appswat.com"
   },
@@ -35,7 +35,8 @@
     "ariatoon",
     "mangatik",
     "mangatime",
-    "mangatuk"
+    "mangatuk",
+    "mangaspark"
   ],
   "default": "mangalek"
 }
