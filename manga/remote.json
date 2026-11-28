@@ -1,5 +1,5 @@
 {
-  "v": 23,
+  "v": 24,
   "homes": {
     "mangaswat": "https:\/\/appswat.com"
   },
@@ -25,7 +25,7 @@
     "orcamanga",
     "oduto",
     "manhatok",
-    "ariatoon"
+    "kawaiimanga"
   ],
   "default": "mangalek"
 }
