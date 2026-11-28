@@ -1,5 +1,5 @@
 {
-  "v": 59,
+  "v": 60,
   "homes": {
     "mangaswat": "https:\/\/appswat.com"
   },
@@ -21,10 +21,9 @@
     "xsanomanga",
     "manhatok",
     "kawaiimanga",
+    "lonertranslations",
     "lavascans",
-    "azora",
-    "ariatoon",
-    "mangatik"
+    "azora"
   ],
   "default": "mangalek"
 }
