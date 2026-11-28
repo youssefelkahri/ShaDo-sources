@@ -1,5 +1,5 @@
 {
-  "v": 50,
+  "v": 51,
   "homes": {
     "mangaswat": "https:\/\/appswat.com"
   },
@@ -29,7 +29,6 @@
     "azora",
     "ariatoon",
     "mangatik",
-    "mangalionz",
     "mangastarz"
   ],
   "default": "mangalek"
