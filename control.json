@@ -5,7 +5,9 @@
   "message": "",
   "minCode": 0,
   "graceDays": 3,
-  "blockedDevices": [],
+  "blockedDevices": [
+    "d7d5baba3c0a"
+  ],
   "codes": {
     "671525a061ed88c9e05eb704a0534a7662fbc857f59bfae40e37a2fe11fa502d": {
       "name": "محمد",
