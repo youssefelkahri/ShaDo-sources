@@ -1,5 +1,5 @@
 {
-  "v": 16,
+  "v": 17,
   "homes": {
     "mangaswat": "https:\/\/appswat.com"
   },
@@ -18,7 +18,8 @@
     "mangaailand",
     "murim",
     "manga3asq",
-    "mangalink"
+    "mangalink",
+    "yokai"
   ],
   "default": "mangalek"
 }
