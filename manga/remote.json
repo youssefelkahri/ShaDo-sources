@@ -1,5 +1,5 @@
 {
-  "v": 63,
+  "v": 64,
   "homes": {
     "mangaswat": "https:\/\/appswat.com"
   },
@@ -20,8 +20,7 @@
     "yokai",
     "xsanomanga",
     "manhatok",
-    "kawaiimanga",
-    "azora"
+    "kawaiimanga"
   ],
   "default": "mangalek"
 }
