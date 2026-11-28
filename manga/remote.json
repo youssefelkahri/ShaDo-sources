@@ -1,7 +1,7 @@
 {
-  "v": 14,
+  "v": 15,
   "homes": {
-    "mangaswat": "https://appswat.com"
+    "mangaswat": "https:\/\/appswat.com"
   },
   "sources": [],
   "off": [
@@ -16,7 +16,8 @@
     "comicverse",
     "eshadow",
     "mangaailand",
-    "murim"
+    "murim",
+    "manga3asq"
   ],
   "default": "mangalek"
 }
